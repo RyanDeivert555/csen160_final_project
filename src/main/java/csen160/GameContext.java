@@ -3,7 +3,6 @@ package csen160;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -11,29 +10,14 @@ import java.io.IOException;
 
 public class GameContext extends Canvas {
     private boolean running = true;
-    private boolean[] keyboardState = new boolean[256];
     private double fps;
     private double fixedDeltaTime;
-
-    // testing
-    double x;
-    double y;
+    private final InputManager input = new InputManager();
 
     public GameContext(double fps) {
         this.fps = fps;
         this.fixedDeltaTime = 1.0 / fps;
-
-        this.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                keyboardState[e.getKeyCode()] = true;
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                keyboardState[e.getKeyCode()] = false;
-            }
-        });
+        this.addKeyListener(input);
     }
 
     public GameContext() {
@@ -70,6 +54,7 @@ public class GameContext extends Canvas {
             accum += elapsed;
 
             while (accum >= 1.0) {
+                input.update();
                 update();
                 accum -= 1.0;
             }
@@ -85,22 +70,9 @@ public class GameContext extends Canvas {
     }
 
     private void update() {
-        if (keyboardState[KeyEvent.VK_ESCAPE]) {
+        if (input.isKeyDown(KeyEvent.VK_ESCAPE)) {
             running = false;
             return;
-        }
-
-        if (keyboardState[KeyEvent.VK_A]) {
-            x -= 200 * getDeltaTime();
-        }
-        if (keyboardState[KeyEvent.VK_D]) {
-            x += 200 * getDeltaTime();
-        }
-        if (keyboardState[KeyEvent.VK_S]) {
-            y += 200 * getDeltaTime();
-        }
-        if (keyboardState[KeyEvent.VK_W]) {
-            y -= 200 * getDeltaTime();
         }
     }
 
@@ -116,9 +88,6 @@ public class GameContext extends Canvas {
         g.setColor(Color.DARK_GRAY);
         g.fillRect(0, 0, getWidth(), getHeight());
         // Draw stuff here
-
-        g.setColor(Color.RED);
-        g.fillRect((int) x, (int) y, 50, 50);
 
         g.dispose();
         bs.show();
