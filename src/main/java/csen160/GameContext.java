@@ -1,23 +1,21 @@
 package csen160;
 
-import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class GameContext extends Canvas {
+public class GameContext {
     private boolean running = true;
     private double fps;
     private double fixedDeltaTime;
     private final InputManager input = new InputManager();
+    private final Renderer renderer = new Renderer();
 
     public GameContext(double fps) {
         this.fps = fps;
         this.fixedDeltaTime = 1.0 / fps;
-        this.addKeyListener(input);
+        this.renderer.addKeyListener(input);
     }
 
     public GameContext() {
@@ -36,12 +34,16 @@ public class GameContext extends Canvas {
         }
     }
 
+    public Renderer getRenderer() {
+        return renderer;
+    }
+
     public double getDeltaTime() {
         return fixedDeltaTime;
     }
 
     public void run() {
-        this.requestFocus();
+        renderer.requestFocus();
         long lastTime = System.nanoTime();
         double accum = 0.0;
         final double nsPerTick = 1_000_000_000.0 / fps;
@@ -60,12 +62,8 @@ public class GameContext extends Canvas {
             }
 
             render();
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                running = false;
-            }
+            // avoid CPU consumption
+            sleep();
         }
     }
 
@@ -77,19 +75,17 @@ public class GameContext extends Canvas {
     }
 
     private void render() {
-        final var bs = this.getBufferStrategy();
-        if (bs == null) {
-            this.createBufferStrategy(3);
-            return;
+        try (final var r = renderer.getContext()) {
+            // draw here
         }
+    }
 
-        final var g = (Graphics2D) bs.getDrawGraphics();
-
-        g.setColor(Color.DARK_GRAY);
-        g.fillRect(0, 0, getWidth(), getHeight());
-        // Draw stuff here
-
-        g.dispose();
-        bs.show();
+    private void sleep() {
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            running = false;
+        }
     }
 }

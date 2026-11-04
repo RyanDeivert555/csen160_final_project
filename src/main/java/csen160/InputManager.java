@@ -6,7 +6,7 @@ import java.awt.event.KeyEvent;
 public class InputManager extends KeyAdapter {
     private static final int KEY_COUNT = 256;
 
-    // TODO: do we need syncronization?
+    // rawState must be synchronized since key input runs on separate thread
     private final boolean[] rawState = new boolean[KEY_COUNT];
     private final boolean[] currentState = new boolean[KEY_COUNT];
     private final boolean[] previousState = new boolean[KEY_COUNT];

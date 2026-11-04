@@ -6,9 +6,10 @@ public class App {
     public static void main(String[] args) {
         final var frame = new JFrame("Final Project");
         final var game = new GameContext();
+        final var renderer = game.getRenderer();
+        renderer.setSize(800, 600);
 
-        game.setSize(800, 600);
-        frame.add(game);
+        frame.add(renderer);
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
