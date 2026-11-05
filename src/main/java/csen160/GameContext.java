@@ -1,37 +1,24 @@
 package csen160;
 
+import java.awt.Color;
 import java.awt.event.KeyEvent;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 
 public class GameContext {
-    private boolean running = true;
+    private boolean running;
     private double fps;
     private double fixedDeltaTime;
     private final InputManager input = new InputManager();
     private final Renderer renderer = new Renderer();
 
     public GameContext(double fps) {
+        running = true;
         this.fps = fps;
-        this.fixedDeltaTime = 1.0 / fps;
-        this.renderer.addKeyListener(input);
+        fixedDeltaTime = 1.0 / fps;
+        renderer.addKeyListener(input);
     }
 
     public GameContext() {
         this(60.0);
-    }
-
-    public static BufferedImage loadSprite(String path) {
-        try (final var in = App.class.getResourceAsStream(path)) {
-            if (in == null) {
-                throw new NullPointerException("Sprite not found: " + path);
-            }
-
-            return ImageIO.read(in);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load " + path, e);
-        }
     }
 
     public Renderer getRenderer() {
@@ -62,6 +49,7 @@ public class GameContext {
             }
 
             render();
+            // TODO: this feels stupid
             // avoid CPU consumption
             sleep();
         }
@@ -76,7 +64,9 @@ public class GameContext {
 
     private void render() {
         try (final var r = renderer.getContext()) {
-            // draw here
+            r.setColor(Color.BLACK);
+            r.clearBackground();
+
         }
     }
 

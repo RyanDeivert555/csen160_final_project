@@ -12,6 +12,8 @@
   <url>http://www.example.com</url>
 
   <properties>
+  <!-- TODO: change if we do unit testing -->
+    <skipTests>true</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>25</maven.compiler.release>
   </properties>

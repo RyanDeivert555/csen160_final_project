@@ -9,8 +9,9 @@ public class Renderer extends Canvas {
     public class Context implements AutoCloseable {
         private final BufferStrategy bufferStrategy;
         private final Graphics2D graphics;
+        private final Canvas canvas;
 
-        public Context() {
+        public Context(Canvas canvas) {
             final var bs = getBufferStrategy();
             if (bs == null) {
                 createBufferStrategy(3);
@@ -18,10 +19,15 @@ public class Renderer extends Canvas {
 
             bufferStrategy = getBufferStrategy();
             graphics = (Graphics2D) bufferStrategy.getDrawGraphics();
+            this.canvas = canvas;
         }
 
         public void setColor(Color color) {
             graphics.setColor(color);
+        }
+
+        public void clearBackground() {
+            graphics.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         }
 
         public void drawRect(int x, int y, int width, int height) {
@@ -39,6 +45,6 @@ public class Renderer extends Canvas {
     }
 
     public Context getContext() {
-        return new Context();
+        return new Context(this);
     }
 }
