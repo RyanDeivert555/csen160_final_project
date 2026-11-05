@@ -49,8 +49,7 @@ public class GameContext {
             }
 
             render();
-            // TODO: this feels stupid
-            // avoid CPU consumption
+            // Prevent busy-waiting
             sleep();
         }
     }
@@ -72,6 +71,7 @@ public class GameContext {
 
     private void sleep() {
         try {
+            // How long the thread sleeps for doesn't really matter, it can be inaccurate
             Thread.sleep(1);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
