@@ -26,7 +26,7 @@ public class InputManager extends KeyAdapter {
         final var code = event.getKeyCode();
         if (code >= 0 && code < KEY_COUNT) {
             synchronized (rawState) {
-                rawState[code] = true;
+                rawState[code] = false;
             }
         }
     }

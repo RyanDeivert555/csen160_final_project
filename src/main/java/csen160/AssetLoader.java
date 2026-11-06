@@ -1,21 +1,48 @@
 package csen160;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
+
 import javax.imageio.ImageIO;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class AssetLoader {
-    public static BufferedImage loadTexture(String path) {
+    private static InputStream getResouceStream(String path) {
         if (!path.startsWith("/")) {
             throw new RuntimeException("Classpath resource must start with \"/\"");
         }
+        final var stream = App.class.getResourceAsStream(path);
+
+        return Objects.requireNonNull(stream);
+    }
+
+    public static BufferedImage loadTexture(String path) {
+        final var stream = getResouceStream(path);
 
         try {
-            final var stream = App.class.getResourceAsStream(path);
-
             return ImageIO.read(stream);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load resource at \\" + path + "\\", e);
+            throw new RuntimeException("Failed to load resource at \"" + path + "\"", e);
+        }
+    }
+
+    public static Clip loadSound(String path) {
+        try (
+                // TODO: does this need to be a BufferedInputStream?
+                final var stream = new BufferedInputStream(getResouceStream(path));
+                final var audio = AudioSystem.getAudioInputStream(stream);) {
+            final var clip = AudioSystem.getClip();
+            clip.open(audio);
+
+            return clip;
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            throw new RuntimeException("Failed to load resource at \"" + path + "\"", e);
         }
     }
 }
