@@ -2,6 +2,7 @@ package csen160;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
 import java.awt.Canvas;
 import java.awt.Color;
 
@@ -32,6 +33,14 @@ public class Renderer extends Canvas {
 
         public void drawRect(int x, int y, int width, int height) {
             graphics.fillRect(x, y, width, height);
+        }
+
+        public void drawImage(BufferedImage img, int x, int y) {
+            graphics.drawImage(img, x, y, null);
+        }
+
+        public void drawImage(BufferedImage img, int x, int y, int w, int h) {
+            graphics.drawImage(img, x, y, w, h, null);
         }
 
         @Override
