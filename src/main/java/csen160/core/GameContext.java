@@ -1,4 +1,4 @@
-package csen160;
+package csen160.core;
 
 import java.awt.Color;
 import java.awt.event.KeyEvent;

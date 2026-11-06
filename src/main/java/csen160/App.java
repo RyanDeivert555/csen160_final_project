@@ -1,5 +1,6 @@
 package csen160;
 
+import csen160.core.*;
 import javax.swing.JFrame;
 
 public class App {

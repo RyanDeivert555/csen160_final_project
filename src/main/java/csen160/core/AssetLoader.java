@@ -1,4 +1,4 @@
-package csen160;
+package csen160.core;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;

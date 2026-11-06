@@ -1,4 +1,4 @@
-package csen160;
+package csen160.core;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
