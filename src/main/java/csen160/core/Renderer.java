@@ -1,8 +1,6 @@
 package csen160.core;
 
 import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.Canvas;
@@ -46,13 +44,12 @@ public class Renderer extends Canvas {
         }
 
         public void drawImage(Entity e) {
-            Graphics2D g2d = (Graphics2D) graphics.create();
+            final var g2d = (Graphics2D) graphics.create();
 
             g2d.rotate(
                     Math.toRadians(e.rotation),
                     e.x + e.width / 2.0,
-                    e.y + e.height / 2.0
-            );
+                    e.y + e.height / 2.0);
 
             g2d.drawImage(e.img, e.x, e.y, e.getWidth(), e.getHeight(), null);
             g2d.dispose();

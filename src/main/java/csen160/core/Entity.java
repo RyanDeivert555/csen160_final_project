@@ -1,7 +1,5 @@
 package csen160.core;
 
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
 public class Entity {
@@ -22,9 +20,8 @@ public class Entity {
         this.width = img.getWidth();
         this.height = img.getHeight();
 
-        this.speed = 3; // default for now
+        this.speed = 200; // default for now
     }
-
 
     public Entity(String imagePath, double scale) {
         this(imagePath);
@@ -32,11 +29,9 @@ public class Entity {
         this.height = (int) (img.getHeight() * scale);
     }
 
-    public void Move(int x, int y) {
-        // negative y -> up | positive y -> down
-        // positive x -> right | negative x -> left
-        this.x = (int) (this.x + x * speed);
-        this.y = (int) (this.y + y * speed);
+    public void move(int x, int y, double dt) {
+        this.x = (int) (this.x + x * speed * dt);
+        this.y = (int) (this.y + y * speed * dt);
     }
 
     // TODO: collision detection between rotated entities ?
@@ -67,5 +62,4 @@ public class Entity {
     public int getHeight() {
         return this.height;
     }
-
 }

@@ -16,11 +16,9 @@ public class Player extends Entity {
         for (Entity e : entities) {
             if (e.fullyContains(this)) {
                 System.out.println("Inside entity: " + e);
-            }
-            else if(fullyContains(e)){
+            } else if (fullyContains(e)) {
                 System.out.println("Entity is inside: " + e);
-            }
-            else if (intersects(e)) {
+            } else if (intersects(e)) {
                 System.out.println("Intersecting entity: " + e);
             }
         }

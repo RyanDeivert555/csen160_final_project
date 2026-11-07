@@ -67,26 +67,25 @@ public class GameContext {
             return;
         }
 
-        // READ MOVEMENT
-        // IFs ONLY --> ALLOW MULTIPLE KEY PRESSES AT ONCE
+        final var dt = getDeltaTime();
+
         if (input.isKeyDown(KeyEvent.VK_W)) {
-            player.Move(0, -1);
+            player.move(0, -1, dt);
         }
         if (input.isKeyDown(KeyEvent.VK_A)) {
-            player.Move(-1, 0);
+            player.move(-1, 0, dt);
         }
         if (input.isKeyDown(KeyEvent.VK_S)) {
-            player.Move(0, 1);
+            player.move(0, 1, dt);
         }
         if (input.isKeyDown(KeyEvent.VK_D)) {
-            player.Move(1, 0);
+            player.move(1, 0, dt);
         }
 
         // face direction of mouse
         player.rotation = Math.toDegrees(Math.atan2(
                 input.getMouseY() - (player.getY() + player.getHeight() / 2.0),
-                input.getMouseX() - (player.getX() + player.getWidth() / 2.0)
-        ));
+                input.getMouseX() - (player.getX() + player.getWidth() / 2.0)));
         // player.logCollisions(entities);
     }
 
@@ -100,6 +99,13 @@ public class GameContext {
             for (Entity e : entities) {
                 r.drawImage(e);
             }
+
+            int x = input.getMouseX();
+            int y = input.getMouseY();
+
+            r.setColor(Color.PINK);
+            r.drawRect(x, y, 50, 50);
+
         }
     }
 
