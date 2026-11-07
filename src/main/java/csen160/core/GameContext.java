@@ -1,7 +1,8 @@
 package csen160.core;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.util.HashSet;
 
 public class GameContext {
     private boolean running;
@@ -9,6 +10,9 @@ public class GameContext {
     private double fixedDeltaTime;
     private final InputManager input = new InputManager();
     private final Renderer renderer = new Renderer();
+
+    private Player player = new Player();
+    private HashSet<Entity> entities = new HashSet<>();
 
     public GameContext(double fps) {
         running = true;
@@ -35,6 +39,9 @@ public class GameContext {
         double accum = 0.0;
         final double nsPerTick = 1_000_000_000.0 / fps;
 
+        // TODO: test entity --> remove later
+        entities.add(new Entity("/temp.png", .25));
+
         while (running) {
             final long now = System.nanoTime();
             final var elapsed = (now - lastTime) / nsPerTick;
@@ -59,6 +66,28 @@ public class GameContext {
             running = false;
             return;
         }
+
+        // READ MOVEMENT
+        // IFs ONLY --> ALLOW MULTIPLE KEY PRESSES AT ONCE
+        if (input.isKeyDown(KeyEvent.VK_W)) {
+            player.Move(0, -1);
+        }
+        if (input.isKeyDown(KeyEvent.VK_A)) {
+            player.Move(-1, 0);
+        }
+        if (input.isKeyDown(KeyEvent.VK_S)) {
+            player.Move(0, 1);
+        }
+        if (input.isKeyDown(KeyEvent.VK_D)) {
+            player.Move(1, 0);
+        }
+
+        // face direction of mouse
+        player.rotation = Math.toDegrees(Math.atan2(
+                input.getMouseY() - (player.getY() + player.getHeight() / 2.0),
+                input.getMouseX() - (player.getX() + player.getWidth() / 2.0)
+        ));
+        // player.logCollisions(entities);
     }
 
     private void render() {
@@ -66,6 +95,11 @@ public class GameContext {
             r.setColor(Color.BLACK);
             r.clearBackground();
 
+            // MOVE ENTITIES
+            r.drawImage(player);
+            for (Entity e : entities) {
+                r.drawImage(e);
+            }
         }
     }
 

@@ -1,5 +1,7 @@
 package csen160.core;
 
+import csen160.App;
+
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -15,7 +17,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class AssetLoader {
     private static InputStream getResouceStream(String path) {
         if (!path.startsWith("/")) {
-            throw new RuntimeException("Classpath resource must start with \"/\"");
+            path = "/" + path; // TODO: be forgiving of a forgotten / and assume it's otherwise correct
+            // throw new RuntimeException("Classpath resource must start with \"/\"");
         }
         final var stream = App.class.getResourceAsStream(path);
 

@@ -1,7 +1,13 @@
 package csen160.core;
 
+import csen160.App;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
+import static csen160.App.getFrame;
 
 public class InputManager extends KeyAdapter {
     private static final int KEY_COUNT = 256;
@@ -10,6 +16,9 @@ public class InputManager extends KeyAdapter {
     private final boolean[] rawState = new boolean[KEY_COUNT];
     private final boolean[] currentState = new boolean[KEY_COUNT];
     private final boolean[] previousState = new boolean[KEY_COUNT];
+
+    private int mouseX;
+    private int mouseY;
 
     @Override
     public void keyPressed(KeyEvent event) {
@@ -36,6 +45,10 @@ public class InputManager extends KeyAdapter {
         synchronized (rawState) {
             System.arraycopy(rawState, 0, currentState, 0, KEY_COUNT);
         }
+
+        // mouse
+        mouseX = MouseInfo.getPointerInfo().getLocation().x - App.getFrame().getContentPane().getLocationOnScreen().x;
+        mouseY = MouseInfo.getPointerInfo().getLocation().y - App.getFrame().getContentPane().getLocationOnScreen().y;
     }
 
     public boolean isKeyDown(int code) {
@@ -49,4 +62,7 @@ public class InputManager extends KeyAdapter {
     public boolean isKeyReleased(int code) {
         return !currentState[code] && previousState[code];
     }
+
+    public int getMouseX(){ return mouseX; }
+    public int getMouseY(){ return mouseY; }
 }
