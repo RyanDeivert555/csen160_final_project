@@ -1,5 +1,7 @@
 package csen160.core;
 
+import csen160.entity.Entity;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;

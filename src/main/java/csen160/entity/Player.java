@@ -1,4 +1,6 @@
-package csen160.core;
+package csen160.entity;
+
+import csen160.core.*;
 
 import java.awt.Graphics2D;
 
@@ -22,7 +24,8 @@ public class Player extends Entity {
         tempCtx.rotate(
                 Math.toRadians(rotation),
                 x + (50 / 2), y + (50 / 2));
-        tempCtx.drawImage(img, x, y, 50, 50, null);
+        // TODO: player width?
+        tempCtx.drawImage(img, (int) x, (int) y, 50, 50, null);
 
         tempCtx.dispose();
     }
