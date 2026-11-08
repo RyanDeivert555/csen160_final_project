@@ -34,6 +34,10 @@ public class Entity {
         this.y = (int) (this.y + y * speed * dt);
     }
 
+    public void shootProjectile(double deg){
+        Projectile p = new Projectile(this.x, this.y, deg);
+    }
+
     // TODO: collision detection between rotated entities ?
     public boolean intersects(Entity other) {
         return (x <= (other.x + other.width) && (x + width) >= other.x)
