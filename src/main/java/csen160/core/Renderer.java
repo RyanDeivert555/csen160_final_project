@@ -44,15 +44,7 @@ public class Renderer extends Canvas {
         }
 
         public void drawImage(Entity e) {
-            final var g2d = (Graphics2D) graphics.create();
-
-            g2d.rotate(
-                    Math.toRadians(e.rotation),
-                    e.x + e.width / 2.0,
-                    e.y + e.height / 2.0);
-
-            g2d.drawImage(e.img, e.x, e.y, e.getWidth(), e.getHeight(), null);
-            g2d.dispose();
+            e.render(graphics);
         }
 
         @Override

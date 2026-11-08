@@ -2,7 +2,6 @@ package csen160.core;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.util.HashSet;
 
 public class GameContext {
     private boolean running;
@@ -12,7 +11,6 @@ public class GameContext {
     private final Renderer renderer = new Renderer();
 
     private Player player = new Player();
-    private HashSet<Entity> entities = new HashSet<>();
 
     public GameContext(double fps) {
         running = true;
@@ -38,9 +36,6 @@ public class GameContext {
         long lastTime = System.nanoTime();
         double accum = 0.0;
         final double nsPerTick = 1_000_000_000.0 / fps;
-
-        // TODO: test entity --> remove later
-        entities.add(new Entity("/temp.png", .25));
 
         while (running) {
             final long now = System.nanoTime();
@@ -82,11 +77,10 @@ public class GameContext {
             player.move(1, 0, dt);
         }
 
-        // face direction of mouse
+        final var playerBbox = player.getBbox();
         player.rotation = Math.toDegrees(Math.atan2(
-                input.getMouseY() - (player.getY() + player.getHeight() / 2.0),
-                input.getMouseX() - (player.getX() + player.getWidth() / 2.0)));
-        // player.logCollisions(entities);
+                input.getMouseY() - (player.getY() + playerBbox.h() / 2.0),
+                input.getMouseX() - (player.getX() + playerBbox.w() / 2.0)));
     }
 
     private void render() {
@@ -94,12 +88,7 @@ public class GameContext {
             r.setColor(Color.BLACK);
             r.clearBackground();
 
-            // MOVE ENTITIES
             r.drawImage(player);
-            for (Entity e : entities) {
-                r.drawImage(e);
-            }
-
             int x = input.getMouseX();
             int y = input.getMouseY();
 
