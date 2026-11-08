@@ -47,7 +47,7 @@ public class InputManager extends KeyAdapter implements MouseListener {
     @Override
     public void mousePressed(MouseEvent e) {
         int button = e.getButton();
-        if (button >= 0 && button < MOUSE_BUTTON_COUNT) {
+        if (button > 0 && button < MOUSE_BUTTON_COUNT) {
             synchronized (rawMouseState) {
                 rawMouseState[button] = true;
             }
@@ -57,7 +57,7 @@ public class InputManager extends KeyAdapter implements MouseListener {
     @Override
     public void mouseReleased(MouseEvent e) {
         int button = e.getButton();
-        if (button >= 0 && button < MOUSE_BUTTON_COUNT) {
+        if (button > 0 && button < MOUSE_BUTTON_COUNT) {
             synchronized (rawMouseState) {
                 rawMouseState[button] = false;
             }

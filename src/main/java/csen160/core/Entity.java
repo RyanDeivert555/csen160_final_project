@@ -3,8 +3,8 @@ package csen160.core;
 import java.awt.image.BufferedImage;
 
 public class Entity {
-    int x;
-    int y;
+    double x;
+    double y;
 
     int width;
     int height;
@@ -29,13 +29,13 @@ public class Entity {
         this.height = (int) (img.getHeight() * scale);
     }
 
-    public void move(int x, int y, double dt) {
-        this.x = (int) (this.x + x * speed * dt);
-        this.y = (int) (this.y + y * speed * dt);
+    public void move(double x, double y, double dt) {
+        this.x = this.x + x * speed * dt;
+        this.y = this.y + y * speed * dt;
     }
 
-    public void shootProjectile(double deg){
-        Projectile p = new Projectile(this.x, this.y, deg);
+    public Projectile shootProjectile(double deg) {
+        return new Projectile((int) (this.x + ((double) this.width / 2)), (int) (this.y + ((double) this.height / 2)), deg);
     }
 
     // TODO: collision detection between rotated entities ?
@@ -52,11 +52,11 @@ public class Entity {
     }
 
     public int getX() {
-        return this.x;
+        return (int)this.x;
     }
 
     public int getY() {
-        return this.y;
+        return (int)this.y;
     }
 
     public int getWidth() {

@@ -51,7 +51,7 @@ public class Renderer extends Canvas {
                     e.x + e.width / 2.0,
                     e.y + e.height / 2.0);
 
-            g2d.drawImage(e.img, e.x, e.y, e.getWidth(), e.getHeight(), null);
+            g2d.drawImage(e.img, e.getX(), e.getY(), e.getWidth(), e.getHeight(), null);
             g2d.dispose();
         }
 
