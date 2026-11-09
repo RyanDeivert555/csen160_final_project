@@ -14,7 +14,7 @@ public class GameContext {
     private final Renderer renderer = new Renderer();
 
     private Player player = new Player();
-    private HashSet<Entity> entities = new HashSet<>();
+    private HashSet<Enemy> enemies = new HashSet<>();
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
 
     public GameContext(double fps) {
@@ -42,6 +42,10 @@ public class GameContext {
         long lastTime = System.nanoTime();
         double accum = 0.0;
         final double nsPerTick = 1_000_000_000.0 / fps;
+
+        Enemy e = new Enemy();
+        enemies.add(e);
+        e.teleport(200, 200);
 
         while (running) {
             final long now = System.nanoTime();
@@ -90,11 +94,14 @@ public class GameContext {
                 input.getMouseX() - (player.getX() + playerBbox.w() / 2.0)));
 
         // move all projectiles, destroy if lifetime elapsed
-        playerProjectiles.removeIf(p -> p.travel(dt));
+        playerProjectiles.removeIf(p -> {
+            boolean expired = p.travel(dt);
+            boolean hit = enemies.removeIf(e -> e.getBbox().intersects(p.getBbox())); // todo: change removeIf -> for loop when implementing enemy health
+            return expired || hit;
+        });
 
         // shoot
         if (input.isMousePressed(1)) {
-            System.out.println("hit");
             Projectile p = player.shootProjectile(player.rotation);
             playerProjectiles.add(p);
         }
@@ -106,7 +113,7 @@ public class GameContext {
             r.clearBackground();
 
             r.drawImage(player);
-            for (Entity e : entities) {
+            for (Enemy e : enemies) {
                 r.drawImage(e);
             }
             for (Projectile p : playerProjectiles) {

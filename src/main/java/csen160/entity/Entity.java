@@ -24,6 +24,12 @@ public abstract class Entity {
         this.y = this.y + dy * speed * dt;
     }
 
+    public void teleport(int x, int y) {
+        this.x = x;
+        this.y = y
+        ;
+    }
+
     public Projectile shootProjectile(double deg) {
         final var bounds = getBbox();
         return new Projectile(this.x + bounds.w() / 2.0, this.y + bounds.h() / 2.0,

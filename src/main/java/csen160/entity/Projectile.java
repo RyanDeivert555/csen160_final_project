@@ -8,6 +8,9 @@ public class Projectile extends Entity {
     double lifetime;
     double direction; // degrees
 
+    double width;
+    double height;
+
     double timeSinceCreation;
 
     public Projectile() {
@@ -16,13 +19,15 @@ public class Projectile extends Entity {
         this.lifetime = 3;
     }
 
-    public Projectile(double x, double y, double direction, double speed, double lifetime) {
+    public Projectile(double x, double y, double direction, double speed, double lifetime, double width, double height) {
         super("/projectile.png");
         this.x = x;
         this.y = y;
         this.direction = direction;
         this.speed = speed;
         this.lifetime = lifetime;
+        this.width = width;
+        this.height = height;
     }
 
     public Projectile(double x, double y, double direction) {
@@ -48,11 +53,11 @@ public class Projectile extends Entity {
     @Override
     public BBox getBbox() {
         // TODO: discuss different projectile sizes
-        return new BBox(x, y, 100, 100);
+        return new BBox(x, y, this.width, this.height);
     }
 
     @Override
     public void render(Graphics2D ctx) {
-        ctx.drawImage(this.img, (int) x, (int) y, null);
+        ctx.drawImage(this.img, (int) x, (int) y, (int)this.width, (int)this.height, null);
     }
 }
