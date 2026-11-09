@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+// TODO: change adapter to listener
 public class InputManager extends KeyAdapter implements MouseListener {
     private static final int KEY_COUNT = 256;
     private static final int MOUSE_BUTTON_COUNT = 4; // NONE , PRIMARY , MIDDLE , SECONDARY

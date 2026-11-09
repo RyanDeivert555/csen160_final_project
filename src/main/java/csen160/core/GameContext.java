@@ -1,6 +1,5 @@
 package csen160.core;
 
-import csen160.App;
 import csen160.entity.*;
 
 import java.awt.*;
@@ -95,6 +94,7 @@ public class GameContext {
 
         // shoot
         if (input.isMousePressed(1)) {
+            System.out.println("hit");
             Projectile p = player.shootProjectile(player.rotation);
             playerProjectiles.add(p);
         }

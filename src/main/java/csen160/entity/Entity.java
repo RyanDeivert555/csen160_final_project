@@ -15,7 +15,6 @@ public abstract class Entity {
 
     public Entity(String imagePath) {
         this.img = AssetLoader.loadTexture(imagePath);
-
         this.speed = 200; // default for now
     }
 
@@ -27,7 +26,7 @@ public abstract class Entity {
 
     public Projectile shootProjectile(double deg) {
         final var bounds = getBbox();
-        return new Projectile((int) (this.x + ((double) bounds.w() / 2)), (int) (this.y + ((double) bounds.h() / 2)),
+        return new Projectile(this.x + bounds.w() / 2.0, this.y + bounds.h() / 2.0,
                 deg);
     }
 

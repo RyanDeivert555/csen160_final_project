@@ -5,7 +5,6 @@ import csen160.core.*;
 import java.awt.Graphics2D;
 
 public class Projectile extends Entity {
-
     double lifetime;
     double direction; // degrees
 
@@ -17,6 +16,15 @@ public class Projectile extends Entity {
         this.lifetime = 3;
     }
 
+    public Projectile(double x, double y, double direction, double speed, double lifetime) {
+        super("/projectile.png");
+        this.x = x;
+        this.y = y;
+        this.direction = direction;
+        this.speed = speed;
+        this.lifetime = lifetime;
+    }
+
     public Projectile(double x, double y, double direction) {
         this();
         this.x = x;
@@ -26,7 +34,7 @@ public class Projectile extends Entity {
 
     public boolean travel(double dt) {
         this.timeSinceCreation += dt;
-        if (this.timeSinceCreation > lifetime) {
+        if (this.timeSinceCreation >= lifetime) {
             return true; // please destroy me!
         }
 
@@ -45,7 +53,6 @@ public class Projectile extends Entity {
 
     @Override
     public void render(Graphics2D ctx) {
-
+        ctx.drawImage(this.img, (int) x, (int) y, null);
     }
-
 }

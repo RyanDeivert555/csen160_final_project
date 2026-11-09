@@ -5,9 +5,10 @@ import csen160.core.*;
 import java.awt.Graphics2D;
 
 public class Player extends Entity {
-    public Player() {
-        super("/player.png");
+    private static String path = "/player.png";
 
+    public Player() {
+        super(path);
         this.x = 100;
         this.y = 100;
     }
