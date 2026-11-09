@@ -12,10 +12,10 @@ public class InputManager extends KeyAdapter implements MouseListener {
     private static final int KEY_COUNT = 256;
     private static final int MOUSE_BUTTON_COUNT = 4; // NONE , PRIMARY , MIDDLE , SECONDARY
 
-    // rawState must be synchronized since key input runs on separate thread
-    private final boolean[] rawState = new boolean[KEY_COUNT];
-    private final boolean[] currentState = new boolean[KEY_COUNT];
-    private final boolean[] previousState = new boolean[KEY_COUNT];
+    // raw state must be synchronized since key input runs on separate thread
+    private final boolean[] rawKeyboardState = new boolean[KEY_COUNT];
+    private final boolean[] currentKeyboardState = new boolean[KEY_COUNT];
+    private final boolean[] previousKeyboardState = new boolean[KEY_COUNT];
 
     private final boolean[] rawMouseState = new boolean[MOUSE_BUTTON_COUNT];
     private final boolean[] currentMouseState = new boolean[MOUSE_BUTTON_COUNT];
@@ -28,8 +28,8 @@ public class InputManager extends KeyAdapter implements MouseListener {
     public void keyPressed(KeyEvent event) {
         final var code = event.getKeyCode();
         if (code >= 0 && code < KEY_COUNT) {
-            synchronized (rawState) {
-                rawState[code] = true;
+            synchronized (rawKeyboardState) {
+                rawKeyboardState[code] = true;
             }
         }
     }
@@ -38,8 +38,8 @@ public class InputManager extends KeyAdapter implements MouseListener {
     public void keyReleased(KeyEvent event) {
         final var code = event.getKeyCode();
         if (code >= 0 && code < KEY_COUNT) {
-            synchronized (rawState) {
-                rawState[code] = false;
+            synchronized (rawKeyboardState) {
+                rawKeyboardState[code] = false;
             }
         }
     }
@@ -77,32 +77,33 @@ public class InputManager extends KeyAdapter implements MouseListener {
     }
 
     public void update() {
-        System.arraycopy(currentState, 0, previousState, 0, KEY_COUNT);
-        System.arraycopy(currentMouseState, 0, previousMouseState, 0, MOUSE_BUTTON_COUNT);
-
-        synchronized (rawState) {
-            System.arraycopy(rawState, 0, currentState, 0, KEY_COUNT);
+        System.arraycopy(currentKeyboardState, 0, previousKeyboardState, 0, KEY_COUNT);
+        synchronized (rawKeyboardState) {
+            System.arraycopy(rawKeyboardState, 0, currentKeyboardState, 0, KEY_COUNT);
         }
+
+        System.arraycopy(currentMouseState, 0, previousMouseState, 0, MOUSE_BUTTON_COUNT);
         synchronized (rawMouseState) {
             System.arraycopy(rawMouseState, 0, currentMouseState, 0, MOUSE_BUTTON_COUNT);
         }
 
         Point mouse = MouseInfo.getPointerInfo().getLocation();
+        // TODO: find a way to get mouse pos without global state
         Point origin = App.getFrame().getContentPane().getLocationOnScreen();
         mouseX = mouse.x - origin.x;
         mouseY = mouse.y - origin.y;
     }
 
     public boolean isKeyDown(int code) {
-        return currentState[code];
+        return currentKeyboardState[code];
     }
 
     public boolean isKeyPressed(int code) {
-        return currentState[code] && !previousState[code];
+        return currentKeyboardState[code] && !previousKeyboardState[code];
     }
 
     public boolean isKeyReleased(int code) {
-        return !currentState[code] && previousState[code];
+        return !currentKeyboardState[code] && previousKeyboardState[code];
     }
 
     public boolean isMouseDown(int button) {
