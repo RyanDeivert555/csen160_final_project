@@ -9,20 +9,18 @@ public class Enemy extends Entity {
 
     public Enemy() {
         super("/temp.png");
-        this.x = 100;
-        this.y = 100;
     }
 
     @Override
     public Projectile shootProjectile(double deg) {
         final var bounds = getBbox();
-        return new Projectile(this.x + bounds.w() / 2.0, this.y + bounds.h() / 2.0,
+        return new Projectile(position.x + bounds.w() / 2.0, position.y + bounds.h() / 2.0,
                 deg, 500, 5, 10, 10);
     }
 
     @Override
     public BBox getBbox() {
-        return new BBox(x, y, 50, 50);
+        return new BBox(position.x, position.y, 50, 50);
     }
 
     @Override
@@ -31,9 +29,9 @@ public class Enemy extends Entity {
 
         tempCtx.rotate(
                 Math.toRadians(rotation),
-                x + (50 / 2), y + (50 / 2));
+                position.x + (50 / 2), position.y + (50 / 2));
         // TODO: player width?
-        tempCtx.drawImage(img, (int) x, (int) y, 50, 50, null);
+        tempCtx.drawImage(img, (int) position.x, (int) position.y, 50, 50, null);
 
         tempCtx.dispose();
     }

@@ -5,6 +5,7 @@ import csen160.entity.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.util.HashSet;
 
 public class GameContext {
@@ -27,7 +28,7 @@ public class GameContext {
         renderer.addMouseListener(input);
         renderer.addMouseMotionListener(input);
 
-        camera = new Camera(0.0, 0.0, 1.0, renderer.getWidth(), renderer.getHeight());
+        camera = new Camera(new Point2D.Double(), 1.0, renderer.getWidth(), renderer.getHeight());
     }
 
     public GameContext() {
