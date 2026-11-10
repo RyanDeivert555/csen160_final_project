@@ -1,17 +1,15 @@
 package csen160.core;
 
-import csen160.App;
-
-import java.awt.*;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 // TODO: change adapter to listener
-public class InputManager extends KeyAdapter implements MouseListener {
+public class InputManager implements KeyListener, MouseListener, MouseMotionListener {
     private static final int KEY_COUNT = 256;
-    private static final int MOUSE_BUTTON_COUNT = 4; // NONE , PRIMARY , MIDDLE , SECONDARY
+    private static final int MOUSE_BUTTON_COUNT = 3; // BUTTON1, BUTTON2, BUTTON3
 
     // raw state must be synchronized since key input runs on separate thread
     private final boolean[] rawKeyboardState = new boolean[KEY_COUNT];
@@ -22,6 +20,7 @@ public class InputManager extends KeyAdapter implements MouseListener {
     private final boolean[] currentMouseState = new boolean[MOUSE_BUTTON_COUNT];
     private final boolean[] previousMouseState = new boolean[MOUSE_BUTTON_COUNT];
 
+    // TODO: thread stuff :(
     private int mouseX;
     private int mouseY;
 
@@ -46,6 +45,10 @@ public class InputManager extends KeyAdapter implements MouseListener {
     }
 
     @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
     public void mousePressed(MouseEvent e) {
         int button = e.getButton();
         if (button > 0 && button < MOUSE_BUTTON_COUNT) {
@@ -63,6 +66,18 @@ public class InputManager extends KeyAdapter implements MouseListener {
                 rawMouseState[button] = false;
             }
         }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
     }
 
     @Override
@@ -87,12 +102,6 @@ public class InputManager extends KeyAdapter implements MouseListener {
         synchronized (rawMouseState) {
             System.arraycopy(rawMouseState, 0, currentMouseState, 0, MOUSE_BUTTON_COUNT);
         }
-
-        Point mouse = MouseInfo.getPointerInfo().getLocation();
-        // TODO: find a way to get mouse pos without global state
-        Point origin = App.getFrame().getContentPane().getLocationOnScreen();
-        mouseX = mouse.x - origin.x;
-        mouseY = mouse.y - origin.y;
     }
 
     public boolean isKeyDown(int code) {
@@ -118,7 +127,6 @@ public class InputManager extends KeyAdapter implements MouseListener {
     public boolean isMouseReleased(int button) {
         return !currentMouseState[button] && previousMouseState[button];
     }
-
 
     public int getMouseX() {
         return mouseX;

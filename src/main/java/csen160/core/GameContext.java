@@ -4,6 +4,7 @@ import csen160.entity.*;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.util.HashSet;
 
 public class GameContext {
@@ -13,6 +14,7 @@ public class GameContext {
     private final InputManager input = new InputManager();
     private final Renderer renderer = new Renderer();
 
+    private Camera camera;
     private Player player = new Player();
     private HashSet<Enemy> enemies = new HashSet<>();
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
@@ -23,6 +25,9 @@ public class GameContext {
         fixedDeltaTime = 1.0 / fps;
         renderer.addKeyListener(input);
         renderer.addMouseListener(input);
+        renderer.addMouseMotionListener(input);
+
+        camera = new Camera(0.0, 0.0, 1.0, renderer.getWidth(), renderer.getHeight());
     }
 
     public GameContext() {
@@ -88,20 +93,29 @@ public class GameContext {
             player.move(1, 0, dt);
         }
 
-        final var playerBbox = player.getBbox();
-        player.rotation = Math.toDegrees(Math.atan2(
-                input.getMouseY() - (player.getY() + playerBbox.h() / 2.0),
-                input.getMouseX() - (player.getX() + playerBbox.w() / 2.0)));
+        final var bbox = player.getBbox();
+        final var centerX = player.getX() + bbox.w() / 2.0;
+        final var centerY = player.getY() + bbox.h() / 2.0;
+
+        camera.setViewSize(renderer.getWidth(), renderer.getHeight());
+        camera.setPosition(centerX, centerY);
+
+        final var mouseWorld = camera.screenToWorld(input.getMouseX(), input.getMouseY());
+        final var dx = mouseWorld.x - centerX;
+        final var dy = mouseWorld.y - centerY;
+        player.rotation = Math.toDegrees(Math.atan2(dy, dx));
 
         // move all projectiles, destroy if lifetime elapsed
         playerProjectiles.removeIf(p -> {
             boolean expired = p.travel(dt);
-            boolean hit = enemies.removeIf(e -> e.getBbox().intersects(p.getBbox())); // todo: change removeIf -> for loop when implementing enemy health
+            boolean hit = enemies.removeIf(e -> e.getBbox().intersects(p.getBbox())); // todo: change removeIf -> for
+                                                                                      // loop when implementing enemy
+                                                                                      // health
             return expired || hit;
         });
 
         // shoot
-        if (input.isMousePressed(1)) {
+        if (input.isMousePressed(MouseEvent.BUTTON1)) {
             Projectile p = player.shootProjectile(player.rotation);
             playerProjectiles.add(p);
         }
@@ -112,20 +126,24 @@ public class GameContext {
             r.setColor(Color.BLACK);
             r.clearBackground();
 
+            // world drawing
+            r.useCamera(camera);
+
             r.drawImage(player);
-            for (Enemy e : enemies) {
+            for (final var e : enemies) {
                 r.drawImage(e);
             }
-            for (Projectile p : playerProjectiles) {
+            for (final var p : playerProjectiles) {
                 r.drawImage(p);
             }
 
+            // ui drawing
+            r.useScreenSpace();
             int x = input.getMouseX();
             int y = input.getMouseY();
 
             r.setColor(Color.BLUE);
             r.drawRect(x - 10, y - 10, 20, 20);
-
         }
     }
 

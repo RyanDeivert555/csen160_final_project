@@ -14,13 +14,14 @@ public class Player extends Entity {
         this.y = 100;
     }
 
-//    public Projectile(double x, double y, double direction, double speed, double lifetime, double width, double height) {
+    // public Projectile(double x, double y, double direction, double speed, double
+    // lifetime, double width, double height) {
 
     @Override
     public Projectile shootProjectile(double deg) {
         final var bounds = getBbox();
         return new Projectile(this.x + bounds.w() / 2.0, this.y + bounds.h() / 2.0,
-                deg, 500, 5, 10, 10);
+                deg, 500, 1, 10, 10);
     }
 
     @Override

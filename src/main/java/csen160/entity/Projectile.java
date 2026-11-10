@@ -19,7 +19,8 @@ public class Projectile extends Entity {
         this.lifetime = 3;
     }
 
-    public Projectile(double x, double y, double direction, double speed, double lifetime, double width, double height) {
+    public Projectile(double x, double y, double direction, double speed, double lifetime, double width,
+            double height) {
         super("/projectile.png");
         this.x = x;
         this.y = y;
@@ -52,12 +53,11 @@ public class Projectile extends Entity {
 
     @Override
     public BBox getBbox() {
-        // TODO: discuss different projectile sizes
         return new BBox(x, y, this.width, this.height);
     }
 
     @Override
     public void render(Graphics2D ctx) {
-        ctx.drawImage(this.img, (int) x, (int) y, (int)this.width, (int)this.height, null);
+        ctx.drawImage(this.img, (int) x, (int) y, (int) this.width, (int) this.height, null);
     }
 }

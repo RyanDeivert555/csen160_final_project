@@ -3,6 +3,7 @@ package csen160.core;
 import csen160.entity.Entity;
 
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.Canvas;
@@ -12,9 +13,9 @@ public class Renderer extends Canvas {
     public class Context implements AutoCloseable {
         private final BufferStrategy bufferStrategy;
         private final Graphics2D graphics;
-        private final Canvas canvas;
+        private final AffineTransform screenTransform;
 
-        public Context(Canvas canvas) {
+        public Context() {
             final var bs = getBufferStrategy();
             if (bs == null) {
                 createBufferStrategy(3);
@@ -22,7 +23,16 @@ public class Renderer extends Canvas {
 
             bufferStrategy = getBufferStrategy();
             graphics = (Graphics2D) bufferStrategy.getDrawGraphics();
-            this.canvas = canvas;
+            screenTransform = graphics.getTransform();
+        }
+
+        public void useCamera(Camera camera) {
+            graphics.setTransform(screenTransform);
+            graphics.transform(camera.getTransform());
+        }
+
+        public void useScreenSpace() {
+            graphics.setTransform(screenTransform);
         }
 
         public void setColor(Color color) {
@@ -30,7 +40,7 @@ public class Renderer extends Canvas {
         }
 
         public void clearBackground() {
-            graphics.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+            graphics.fillRect(0, 0, getWidth(), getHeight());
         }
 
         public void drawRect(int x, int y, int width, int height) {
@@ -60,6 +70,6 @@ public class Renderer extends Canvas {
     }
 
     public Context getContext() {
-        return new Context(this);
+        return new Context();
     }
 }
