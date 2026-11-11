@@ -2,12 +2,10 @@ package csen160.core;
 
 import csen160.entity.Entity;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
-import java.awt.Canvas;
-import java.awt.Color;
 
 public class Renderer extends Canvas {
     public class Context implements AutoCloseable {
@@ -57,6 +55,12 @@ public class Renderer extends Canvas {
 
         public void drawImage(Entity e) {
             e.render(graphics);
+        }
+
+        public void drawString(String t, int x, int y){
+            graphics.setColor(Color.WHITE);
+            graphics.setFont(new Font("comic sans ms", Font.BOLD, 24));
+            graphics.drawString(t, x, y);
         }
 
         @Override

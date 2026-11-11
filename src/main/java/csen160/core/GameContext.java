@@ -6,7 +6,10 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameContext {
     private boolean running;
@@ -15,10 +18,15 @@ public class GameContext {
     private final InputManager input = new InputManager();
     private final Renderer renderer = new Renderer();
 
+    private final BufferedImage bg = AssetLoader.loadTexture("bg.png");
+
     private Camera camera;
     private Player player = new Player();
     private HashSet<Enemy> enemies = new HashSet<>();
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
+    private HashSet<Projectile> enemyProjectiles = new HashSet<>();
+
+    private int points = 0;
 
     public GameContext(double fps) {
         running = true;
@@ -94,6 +102,14 @@ public class GameContext {
             player.move(1, 0, dt);
         }
 
+        // update player and enemies
+        player.update(dt);
+        for (Enemy e : enemies) {
+            e.update(dt);
+            Projectile p = e.shootProjectile(e.angleTowards(player));
+            if(p != null) enemyProjectiles.add(p);
+        }
+
         final var bbox = player.getBbox();
         final var centerX = player.getX() + bbox.w() / 2.0;
         final var centerY = player.getY() + bbox.h() / 2.0;
@@ -106,19 +122,55 @@ public class GameContext {
         final var dy = mouseWorld.y - centerY;
         player.rotation = Math.toDegrees(Math.atan2(dy, dx));
 
-        // move all projectiles, destroy if lifetime elapsed
-        playerProjectiles.removeIf(p -> {
+        // move all player projectiles, destroy if lifetime elapsed
+        Iterator<Projectile> it = playerProjectiles.iterator();
+        while (it.hasNext()) {
+            Projectile p = it.next();
+
             boolean expired = p.travel(dt);
-            boolean hit = enemies.removeIf(e -> e.getBbox().intersects(p.getBbox())); // todo: change removeIf -> for
-                                                                                      // loop when implementing enemy
-                                                                                      // health
-            return expired || hit;
-        });
+            boolean hit = false;
+
+            // check every enemy to see if hit by projectile
+            Iterator<Enemy> enemyIt = enemies.iterator();
+            while (enemyIt.hasNext()) {
+                Enemy e = enemyIt.next();
+                if (e.getBbox().intersects(p.getBbox())) {
+                    // projectile hits enemy
+                    hit = true;
+                    if (e.takeDamage()) {
+                        // enemy defeated
+                        points = (int) (points + 100 * Math.pow(e.getMaxHealth(), 1.2));
+                        enemyIt.remove();
+                    }
+                    break;
+                }
+            }
+            if (expired || hit) it.remove();
+        }
+
+        // move all enemy projectiles, damage player if hit
+        it = enemyProjectiles.iterator();
+        while (it.hasNext()) {
+            Projectile p = it.next();
+
+            boolean expired = p.travel(dt);
+            boolean hit = false;
+
+            if (player.getBbox().intersects(p.getBbox())) {
+                hit = true;
+                if (player.takeDamage()) {
+                    // TODO: defeated -> game over ?
+                }
+            }
+
+            if (expired || hit) it.remove();
+        }
 
         // shoot
-        if (input.isMousePressed(MouseEvent.BUTTON1)) {
+        if (input.isMouseDown(MouseEvent.BUTTON1)) {
             Projectile p = player.shootProjectile(player.rotation);
-            playerProjectiles.add(p);
+            if (p != null)
+                playerProjectiles.add(p);
         }
     }
 
@@ -130,6 +182,8 @@ public class GameContext {
             // world drawing
             r.useCamera(camera);
 
+            r.drawImage(bg, 0, 0);
+
             r.drawImage(player);
             for (final var e : enemies) {
                 r.drawImage(e);
@@ -137,14 +191,17 @@ public class GameContext {
             for (final var p : playerProjectiles) {
                 r.drawImage(p);
             }
+            for (final var p : enemyProjectiles) {
+                r.drawImage(p);
+            }
 
             // ui drawing
             r.useScreenSpace();
+
+            r.drawString("SCORE: " + points, 0, 24);
+
             int x = input.getMouseX();
             int y = input.getMouseY();
-
-            r.setColor(Color.BLUE);
-            r.drawRect(x - 10, y - 10, 20, 20);
         }
     }
 

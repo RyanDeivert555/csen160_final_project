@@ -19,7 +19,7 @@ public class AssetLoader {
     private static HashMap<String, BufferedImage> textures = new HashMap<>();
     private static HashMap<String, Clip> sounds = new HashMap<>();
 
-    private static InputStream getResouceStream(String path) {
+    private static InputStream getResourceStream(String path) {
         final var stream = App.class.getResourceAsStream(path);
 
         return Objects.requireNonNull(stream);
@@ -33,7 +33,7 @@ public class AssetLoader {
             return textures.get(path);
         }
 
-        final var stream = getResouceStream(path);
+        final var stream = getResourceStream(path);
 
         try {
             final var texture = ImageIO.read(stream);
@@ -55,7 +55,7 @@ public class AssetLoader {
 
         try (
                 // TODO: does this need to be a BufferedInputStream?
-                final var stream = new BufferedInputStream(getResouceStream(path));
+                final var stream = new BufferedInputStream(getResourceStream(path));
                 final var audio = AudioSystem.getAudioInputStream(stream);) {
             final var clip = AudioSystem.getClip();
             clip.open(audio);

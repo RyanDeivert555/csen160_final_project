@@ -16,12 +16,18 @@ public class Projectile extends Entity {
     public Projectile() {
         super("/projectile.png");
         this.speed = 500;
-        this.lifetime = 3;
+        this.lifetime = 5;
     }
 
-    public Projectile(double x, double y, double direction, double speed, double lifetime, double width,
-            double height) {
-        super("/projectile.png");
+    public Projectile(String path) {
+        super(path);
+        this.speed = 500;
+        this.lifetime = 5;
+    }
+
+    public Projectile(String path, double x, double y, double direction, double speed, double lifetime, double width,
+                      double height) {
+        this(path);
         this.position.x = x;
         this.position.y = y;
         this.direction = direction;

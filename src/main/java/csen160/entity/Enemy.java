@@ -7,15 +7,31 @@ import java.awt.*;
 public class Enemy extends Entity {
     double projectileSize;
 
+    double fireRate = 3.0;
+    double fireTimer;
+    boolean canFire;
+
     public Enemy() {
         super("/temp.png");
     }
 
+    public void update(double dt) {
+        if (!this.canFire && this.fireTimer >= 1.0 / this.fireRate) {
+            this.canFire = true;
+        } else {
+            this.fireTimer += dt;
+        }
+    }
+
     @Override
     public Projectile shootProjectile(double deg) {
+        if(!this.canFire) return null;
+        this.canFire = false;
+        this.fireTimer = 0;
+
         final var bounds = getBbox();
-        return new Projectile(position.x + bounds.w() / 2.0, position.y + bounds.h() / 2.0,
-                deg, 500, 5, 10, 10);
+        return new Projectile("/evilProjectile.png", position.x + bounds.w() / 2.0, position.y + bounds.h() / 2.0,
+                deg, 250, 5, 10, 10);
     }
 
     @Override
