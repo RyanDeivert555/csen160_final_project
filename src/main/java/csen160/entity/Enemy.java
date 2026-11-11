@@ -7,8 +7,15 @@ import java.awt.*;
 public class Enemy extends Entity {
     double projectileSize;
 
+    double fireRate;
+    double fireTimer;
+
     public Enemy() {
         super("/temp.png");
+    }
+
+    public void update(double dt){
+
     }
 
     @Override

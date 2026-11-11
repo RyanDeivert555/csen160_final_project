@@ -11,15 +11,23 @@ public abstract class Entity {
     BufferedImage img;
     public double rotation;
 
+    int maxHealth;
+    int health;
     double speed;
 
     public Entity(String imagePath) {
         this.img = AssetLoader.loadTexture(imagePath);
+        this.maxHealth = 1; // default for now
+        this.health = this.maxHealth;
         this.speed = 200; // default for now
     }
 
-    // TODO: maybe add check that makes sure dx and dy is normalized?
     public void move(double dx, double dy, double dt) {
+        // normalize
+        double magnitude = Math.sqrt(dx * dx + dy * dy);
+        dx /= magnitude;
+        dy /= magnitude;
+
         this.position.x += dx * speed * dt;
         this.position.y += dy * speed * dt;
     }
@@ -35,12 +43,25 @@ public abstract class Entity {
                 deg);
     }
 
+    public boolean takeDamage() {
+        this.health--;
+        return this.health <= 0;
+    }
+
     public int getX() {
         return (int) this.position.x;
     }
 
     public int getY() {
         return (int) this.position.y;
+    }
+
+    public int getMaxHealth() {
+        return this.maxHealth;
+    }
+
+    public int getHealth() {
+        return this.health;
     }
 
     public abstract BBox getBbox();
