@@ -39,8 +39,7 @@ public abstract class Entity {
 
     public Projectile shootProjectile(double deg) {
         final var bounds = getBbox();
-        return new Projectile(this.position.x + bounds.w() / 2.0, this.position.y + bounds.h() / 2.0,
-                deg);
+        return new Projectile(this.position.x, this.position.y, deg);
     }
 
     public boolean takeDamage() {
@@ -48,15 +47,9 @@ public abstract class Entity {
         return this.health <= 0;
     }
 
-    public double angleTowards(Entity other){
-        final var centerX = this.getX() + this.getBbox().w() / 2.0;
-        final var centerY = this.getY() + this.getBbox().h() / 2.0;
-
-        final var otherCenterX = other.getX() + other.getBbox().w() / 2.0;
-        final var otherCenterY = other.getY() + other.getBbox().h() / 2.0;
-
-        final var dy = otherCenterY - centerX;
-        final var dx = otherCenterX - centerX;
+    public double angleTowards(Entity other) {
+        final var dx = other.getX() - this.position.x;
+        final var dy = other.getY() - this.position.y;
         return Math.toDegrees(Math.atan2(dy, dx));
     }
 
@@ -77,13 +70,6 @@ public abstract class Entity {
     }
 
     public abstract BBox getBbox();
-
-    public Point2D getCenter(){
-        Point2D.Double center = new Point2D.Double();
-        center.x = this.getX() + this.getBbox().w() / 2.0;
-        center.y = this.getY() + this.getBbox().h() / 2.0;
-        return center;
-    }
 
     public abstract void render(Graphics2D ctx);
 }

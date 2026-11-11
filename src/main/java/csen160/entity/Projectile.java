@@ -2,7 +2,7 @@ package csen160.entity;
 
 import csen160.core.*;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 
 public class Projectile extends Entity {
     double lifetime;
@@ -64,6 +64,6 @@ public class Projectile extends Entity {
 
     @Override
     public void render(Graphics2D ctx) {
-        ctx.drawImage(this.img, (int) position.x, (int) position.y, (int) this.width, (int) this.height, null);
+        ctx.drawImage(this.img, (int) (position.x - this.width / 2), (int) (position.y - this.height / 2), (int) this.width, (int) this.height, null);
     }
 }

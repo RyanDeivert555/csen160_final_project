@@ -3,6 +3,7 @@ package csen160.entity;
 import csen160.core.BBox;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.HashSet;
 
 public class Enemy extends Entity {
@@ -12,7 +13,7 @@ public class Enemy extends Entity {
     double fireTimer;
     boolean canFire;
 
-    String projectilePattern = "CIRCLE";
+    String projectilePattern = "default";
 
     public Enemy() {
         super("/temp.png");
@@ -29,13 +30,13 @@ public class Enemy extends Entity {
     @Override
     public Projectile shootProjectile(double deg) {
         final var bounds = getBbox();
-        return new Projectile("/evilProjectile.png", position.x + bounds.w() / 2.0, position.y + bounds.h() / 2.0,
+        return new Projectile("/evilProjectile.png", position.x, position.y,
                 deg, 150, 5, 10, 10);
     }
 
     public Projectile shootProjectile(double deg, double offsetX, double offsetY) {
         final var bounds = getBbox();
-        return new Projectile("/evilProjectile.png", position.x + bounds.w() / 2.0 + offsetX, position.y + bounds.h() / 2.0 + offsetY,
+        return new Projectile("/evilProjectile.png", position.x, position.y,
                 deg, 150, 5, 10, 10);
     }
 
@@ -46,12 +47,25 @@ public class Enemy extends Entity {
         this.fireTimer = 0;
 
         HashSet<Projectile> projectiles = new HashSet<>();
+
         switch (this.projectilePattern) {
             case "CIRCLE":
-                final int count = 12;
-                for (int i = 0; i < count; i++) {
-                    projectiles.add(this.shootProjectile(deg + (360.0 * i / count)));
+                final int circleCount = 12;
+                for (int i = 0; i < circleCount; i++) {
+                    projectiles.add(this.shootProjectile(deg + (360.0 * i / circleCount)));
                 }
+                break;
+            case "ARC":
+                final int arcCount = 8;
+                final double arcSpread = 90.0;
+                for (int i = 0; i < arcCount; i++) {
+                    double offset = (-arcSpread / 2.0) + i * arcSpread / (arcCount - 1);
+                    projectiles.add(this.shootProjectile(deg + offset, this.position.x, this.position.y));
+                }
+                break;
+            case "WALL":
+                projectiles.add(new Projectile("/evilProjectile.png", this.position.x, this.position.y,
+                        deg, 150, 5, 10, 30));
                 break;
             default:
                 projectiles.add(this.shootProjectile(deg));
@@ -69,11 +83,9 @@ public class Enemy extends Entity {
     public void render(Graphics2D ctx) {
         final var tempCtx = (Graphics2D) ctx.create();
 
-        tempCtx.rotate(
-                Math.toRadians(rotation),
-                position.x + (50 / 2), position.y + (50 / 2));
-        // TODO: player width?
-        tempCtx.drawImage(img, (int) position.x, (int) position.y, 50, 50, null);
+        tempCtx.rotate(Math.toRadians(rotation), position.x, position.y);
+
+        tempCtx.drawImage(img, (int) position.x - 25, (int) position.y - 25, 50, 50, null);
 
         tempCtx.dispose();
     }

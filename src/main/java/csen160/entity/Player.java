@@ -2,7 +2,7 @@ package csen160.entity;
 
 import csen160.core.*;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 
 public class Player extends Entity {
     private static String path = "/player.png";
@@ -21,9 +21,9 @@ public class Player extends Entity {
         this.health = 3;
     }
 
-    public void update(double dt){
+    public void update(double dt) {
         //
-        if(!this.canFire && this.fireTimer >= 1.0 / this.fireRate){
+        if (!this.canFire && this.fireTimer >= 1.0 / this.fireRate) {
             this.canFire = true;
         } else {
             this.fireTimer += dt;
@@ -32,12 +32,11 @@ public class Player extends Entity {
 
     @Override
     public Projectile shootProjectile(double deg) {
-        if(!this.canFire) return null;
+        if (!this.canFire) return null;
         this.canFire = false;
         this.fireTimer = 0;
 
-        final var bounds = getBbox();
-        return new Projectile("/projectile.png", position.x + bounds.w() / 2.0, position.y + bounds.h() / 2.0,
+        return new Projectile("/projectile.png", position.x, position.y,
                 deg, 500, 1, 10, 10);
     }
 
@@ -51,12 +50,14 @@ public class Player extends Entity {
         // player is rendered twice as large as the hitbox
         final var tempCtx = (Graphics2D) ctx.create();
 
-        tempCtx.rotate(
-                Math.toRadians(rotation),
-                position.x + ((double) playerWidth / 2), position.y + ((double) playerHeight / 2));
+        tempCtx.rotate(Math.toRadians(rotation), this.position.x, this.position.y);
 
-        tempCtx.drawImage(img, (int) position.x, (int) position.y, playerWidth*2, playerHeight*2, null);
+        tempCtx.drawImage(img, (int) position.x - playerWidth, (int) position.y - playerHeight, playerWidth * 2, playerHeight * 2, null);
 
         tempCtx.dispose();
+
+        // draw hitbox
+        ctx.setColor(Color.yellow);
+        ctx.drawOval((int) position.x - playerWidth / 2, (int) position.y - playerHeight / 2, playerWidth, playerHeight);
     }
 }
