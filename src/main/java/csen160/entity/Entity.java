@@ -2,7 +2,7 @@ package csen160.entity;
 
 import csen160.core.*;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -77,6 +77,13 @@ public abstract class Entity {
     }
 
     public abstract BBox getBbox();
+
+    public Point2D getCenter(){
+        Point2D.Double center = new Point2D.Double();
+        center.x = this.getX() + this.getBbox().w() / 2.0;
+        center.y = this.getY() + this.getBbox().h() / 2.0;
+        return center;
+    }
 
     public abstract void render(Graphics2D ctx);
 }

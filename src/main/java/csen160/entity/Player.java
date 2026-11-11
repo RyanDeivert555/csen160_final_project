@@ -11,12 +11,15 @@ public class Player extends Entity {
     private double fireTimer = 0;
     private boolean canFire = false;
 
+    private final int playerWidth = 25;
+    private final int playerHeight = 25;
+
     public Player() {
         super(path);
-    }
 
-    // public Projectile(double x, double y, double direction, double speed, double
-    // lifetime, double width, double height) {
+        this.maxHealth = 10;
+        this.health = 3;
+    }
 
     public void update(double dt){
         //
@@ -40,18 +43,19 @@ public class Player extends Entity {
 
     @Override
     public BBox getBbox() {
-        return new BBox(position.x, position.y, 50, 50);
+        return new BBox(position.x, position.y, this.playerWidth, this.playerHeight);
     }
 
     @Override
     public void render(Graphics2D ctx) {
+        // player is rendered twice as large as the hitbox
         final var tempCtx = (Graphics2D) ctx.create();
 
         tempCtx.rotate(
                 Math.toRadians(rotation),
-                position.x + (50 / 2), position.y + (50 / 2));
-        // TODO: player width?
-        tempCtx.drawImage(img, (int) position.x, (int) position.y, 50, 50, null);
+                position.x + ((double) playerWidth / 2), position.y + ((double) playerHeight / 2));
+
+        tempCtx.drawImage(img, (int) position.x, (int) position.y, playerWidth*2, playerHeight*2, null);
 
         tempCtx.dispose();
     }
