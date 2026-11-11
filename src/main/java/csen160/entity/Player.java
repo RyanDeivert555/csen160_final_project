@@ -7,7 +7,7 @@ import java.awt.Graphics2D;
 public class Player extends Entity {
     private static String path = "/player.png";
 
-    private final double fireRate = (double) 1 / 10; // 1/<shots per second>
+    private final double fireRate = 10.0; // per second
     private double fireTimer = 0;
     private boolean canFire = false;
 
@@ -20,7 +20,7 @@ public class Player extends Entity {
 
     public void update(double dt){
         //
-        if(!this.canFire && this.fireTimer >= this.fireRate){
+        if(!this.canFire && this.fireTimer >= 1.0 / this.fireRate){
             this.canFire = true;
         } else {
             this.fireTimer += dt;
@@ -34,7 +34,7 @@ public class Player extends Entity {
         this.fireTimer = 0;
 
         final var bounds = getBbox();
-        return new Projectile(position.x + bounds.w() / 2.0, position.y + bounds.h() / 2.0,
+        return new Projectile("/projectile.png", position.x + bounds.w() / 2.0, position.y + bounds.h() / 2.0,
                 deg, 500, 1, 10, 10);
     }
 

@@ -106,6 +106,8 @@ public class GameContext {
         player.update(dt);
         for (Enemy e : enemies) {
             e.update(dt);
+            Projectile p = e.shootProjectile(e.angleTowards(player));
+            if(p != null) enemyProjectiles.add(p);
         }
 
         final var bbox = player.getBbox();
@@ -187,6 +189,9 @@ public class GameContext {
                 r.drawImage(e);
             }
             for (final var p : playerProjectiles) {
+                r.drawImage(p);
+            }
+            for (final var p : enemyProjectiles) {
                 r.drawImage(p);
             }
 

@@ -48,6 +48,18 @@ public abstract class Entity {
         return this.health <= 0;
     }
 
+    public double angleTowards(Entity other){
+        final var centerX = this.getX() + this.getBbox().w() / 2.0;
+        final var centerY = this.getY() + this.getBbox().h() / 2.0;
+
+        final var otherCenterX = other.getX() + other.getBbox().w() / 2.0;
+        final var otherCenterY = other.getY() + other.getBbox().h() / 2.0;
+
+        final var dy = otherCenterY - centerX;
+        final var dx = otherCenterX - centerX;
+        return Math.toDegrees(Math.atan2(dy, dx));
+    }
+
     public int getX() {
         return (int) this.position.x;
     }
