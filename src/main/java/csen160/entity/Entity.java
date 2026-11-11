@@ -8,6 +8,10 @@ import java.awt.image.BufferedImage;
 
 public abstract class Entity {
     Point2D.Double position = new Point2D.Double();
+
+    int width;
+    int height;
+
     BufferedImage img;
     public double rotation;
 
@@ -15,8 +19,13 @@ public abstract class Entity {
     int health;
     double speed;
 
+
     public Entity(String imagePath) {
         this.img = AssetLoader.loadTexture(imagePath);
+
+        this.width = 50;
+        this.height = 50;
+
         this.maxHealth = 1; // default for now
         this.health = this.maxHealth;
         this.speed = 200; // default for now
@@ -59,6 +68,14 @@ public abstract class Entity {
 
     public int getY() {
         return (int) this.position.y;
+    }
+
+    public int getWidth() {
+        return (int) this.width;
+    }
+
+    public int getHeight() {
+        return (int) this.height;
     }
 
     public int getMaxHealth() {

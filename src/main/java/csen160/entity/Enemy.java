@@ -76,7 +76,7 @@ public class Enemy extends Entity {
 
     @Override
     public BBox getBbox() {
-        return new BBox(position.x, position.y, 50, 50);
+        return new BBox(position.x, position.y, this.width, this.height);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class Enemy extends Entity {
 
         tempCtx.rotate(Math.toRadians(rotation), position.x, position.y);
 
-        tempCtx.drawImage(img, (int) position.x - 25, (int) position.y - 25, 50, 50, null);
+        tempCtx.drawImage(img, (int) position.x - 25, (int) position.y - 25, this.width, this.height, null);
 
         tempCtx.dispose();
     }
