@@ -17,8 +17,6 @@ public class GameContext {
     private final InputManager input = new InputManager();
     private final Renderer renderer = new Renderer();
 
-    // image assets
-    private final BufferedImage bg = AssetLoader.loadTexture("bg.png");
     private final BufferedImage heart = AssetLoader.loadTexture("heart.png");
 
     private Camera camera;

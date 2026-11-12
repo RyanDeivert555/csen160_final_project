@@ -19,7 +19,6 @@ public abstract class Entity {
     int health;
     double speed;
 
-
     public Entity(String imagePath) {
         this.img = AssetLoader.loadTexture(imagePath);
 
@@ -35,7 +34,8 @@ public abstract class Entity {
         // normalize
 
         double magnitude = Math.sqrt(dx * dx + dy * dy);
-        if (magnitude == 0) return;
+        if (magnitude == 0)
+            return;
 
         dx /= magnitude;
         dy /= magnitude;
