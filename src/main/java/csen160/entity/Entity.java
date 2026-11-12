@@ -13,6 +13,7 @@ public abstract class Entity {
     int height;
 
     BufferedImage img;
+
     public double rotation;
 
     int maxHealth;
@@ -28,6 +29,15 @@ public abstract class Entity {
         this.maxHealth = 1; // default for now
         this.health = this.maxHealth;
         this.speed = 200; // default for now
+    }
+
+    public Entity(String imagePath, int width, int height, int maxHealth, double speed) {
+        this.img = AssetLoader.loadTexture(imagePath);
+        this.width = width;
+        this.height = height;
+        this.maxHealth = maxHealth;
+        this.health = this.maxHealth;
+        this.speed = speed;
     }
 
     public void move(double dx, double dy, double dt) {
@@ -63,6 +73,12 @@ public abstract class Entity {
         final var dx = other.getX() - this.position.x;
         final var dy = other.getY() - this.position.y;
         return Math.toDegrees(Math.atan2(dy, dx));
+    }
+
+    public double getDistance(Entity other) {
+        double dx = position.x - other.position.x;
+        double dy = position.y - other.position.y;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     public int getX() {
