@@ -3,6 +3,7 @@ package csen160.entity;
 import csen160.core.*;
 
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 
 public class Player extends Entity {
     private static String path = "/player.png";
@@ -11,8 +12,9 @@ public class Player extends Entity {
     private double fireTimer = 0;
     private boolean canFire = false;
 
-    private final int playerWidth = 25;
-    private final int playerHeight = 25;
+    private final int playerWidth = 15;
+    private final int playerHeight = 15;
+    private final double imageScale  = 3.0;
 
     public Player() {
         super(path);
@@ -52,12 +54,16 @@ public class Player extends Entity {
 
         tempCtx.rotate(Math.toRadians(rotation), this.position.x, this.position.y);
 
-        tempCtx.drawImage(img, (int) position.x - playerWidth, (int) position.y - playerHeight, playerWidth * 2, playerHeight * 2, null);
+        int drawWidth = (int) (playerWidth * imageScale);
+        int drawHeight = (int) (playerHeight * imageScale);
+        tempCtx.drawImage(img, (int) (position.x - drawWidth / 2.0), (int) (position.y - drawHeight / 2.0), drawWidth, drawHeight, null);
 
         tempCtx.dispose();
 
         // draw hitbox
-        ctx.setColor(Color.yellow);
+        ctx.setColor(Color.green);
         ctx.drawOval((int) position.x - playerWidth / 2, (int) position.y - playerHeight / 2, playerWidth, playerHeight);
+//        Ellipse2D.Double circle = new Ellipse2D.Double(position.x - playerWidth / 2.0, position.y - playerHeight / 2.0, playerWidth, playerHeight);
+//        ctx.fill(circle);
     }
 }

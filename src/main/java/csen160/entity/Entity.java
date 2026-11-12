@@ -33,7 +33,10 @@ public abstract class Entity {
 
     public void move(double dx, double dy, double dt) {
         // normalize
+
         double magnitude = Math.sqrt(dx * dx + dy * dy);
+        if (magnitude == 0) return;
+
         dx /= magnitude;
         dy /= magnitude;
 

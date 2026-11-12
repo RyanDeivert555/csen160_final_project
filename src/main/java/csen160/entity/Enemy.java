@@ -9,11 +9,11 @@ import java.util.HashSet;
 public class Enemy extends Entity {
     double projectileSize;
 
-    double fireRate = 3.0;
+    double fireRate = 1.0;
     double fireTimer;
     boolean canFire;
 
-    String projectilePattern = "default";
+    String projectilePattern = "RANDOM";
 
     public Enemy() {
         super("/temp.png");
@@ -29,30 +29,28 @@ public class Enemy extends Entity {
 
     @Override
     public Projectile shootProjectile(double deg) {
-        final var bounds = getBbox();
         return new Projectile("/evilProjectile.png", position.x, position.y,
                 deg, 150, 5, 10, 10);
     }
 
-    public Projectile shootProjectile(double deg, double offsetX, double offsetY) {
-        final var bounds = getBbox();
-        return new Projectile("/evilProjectile.png", position.x, position.y,
+    public Projectile shootProjectile(double deg, double x, double y) {
+        return new Projectile("/evilProjectile.png", x, y,
                 deg, 150, 5, 10, 10);
     }
 
 
     public HashSet<Projectile> shootProjectiles(double deg) {
-        if (!this.canFire) return null;
-        this.canFire = false;
-        this.fireTimer = 0;
+        if (!canFire) return null;
+        canFire = false;
+        fireTimer = 0;
 
         HashSet<Projectile> projectiles = new HashSet<>();
 
-        switch (this.projectilePattern) {
+        switch (projectilePattern) {
             case "CIRCLE":
                 final int circleCount = 12;
                 for (int i = 0; i < circleCount; i++) {
-                    projectiles.add(this.shootProjectile(deg + (360.0 * i / circleCount)));
+                    projectiles.add(shootProjectile(deg + (360.0 * i / circleCount)));
                 }
                 break;
             case "ARC":
@@ -60,15 +58,33 @@ public class Enemy extends Entity {
                 final double arcSpread = 90.0;
                 for (int i = 0; i < arcCount; i++) {
                     double offset = (-arcSpread / 2.0) + i * arcSpread / (arcCount - 1);
-                    projectiles.add(this.shootProjectile(deg + offset, this.position.x, this.position.y));
+                    projectiles.add(shootProjectile(deg + offset, position.x, position.y));
                 }
                 break;
             case "WALL":
-                projectiles.add(new Projectile("/evilProjectile.png", this.position.x, this.position.y,
-                        deg, 150, 5, 10, 30));
+                final int wallCount = 5;
+                final double spacing = 25.0;
+
+                // get perpendicular angle
+                double radians = Math.toRadians(deg);
+                double perpX = -Math.sin(radians);
+                double perpY = Math.cos(radians);
+
+                for (int i = 0; i < wallCount; i++) {
+                    double offset = (i - (wallCount - 1) / 2.0) * spacing;
+                    double spawnX = position.x + perpX * offset;
+                    double spawnY = position.y + perpY * offset;
+                    if (i == 0) System.out.println(spawnX + ", " + spawnY);
+                    projectiles.add(shootProjectile(deg, spawnX, spawnY));
+                }
                 break;
+            case "RANDOM":
+                for(int i = 0; i < (int) (Math.random() * 3) + 2; i++){
+                    double randomAngle = Math.random() * 360.0;
+                    projectiles.add(shootProjectile(randomAngle));
+                }
             default:
-                projectiles.add(this.shootProjectile(deg));
+                projectiles.add(shootProjectile(deg));
                 break;
         }
         return projectiles;
@@ -85,7 +101,7 @@ public class Enemy extends Entity {
 
         tempCtx.rotate(Math.toRadians(rotation), position.x, position.y);
 
-        tempCtx.drawImage(img, (int) position.x - 25, (int) position.y - 25, this.width, this.height, null);
+        tempCtx.drawImage(img, (int) position.x - width / 2, (int) position.y - height / 2, this.width, this.height, null);
 
         tempCtx.dispose();
     }
