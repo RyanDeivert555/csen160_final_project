@@ -2,14 +2,11 @@ package csen160.entity;
 
 import csen160.core.*;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 
 public class Projectile extends Entity {
     double lifetime;
     double direction; // degrees
-
-    double width;
-    double height;
 
     double timeSinceCreation;
 
@@ -25,8 +22,8 @@ public class Projectile extends Entity {
         this.lifetime = 5;
     }
 
-    public Projectile(String path, double x, double y, double direction, double speed, double lifetime, double width,
-                      double height) {
+    public Projectile(String path, double x, double y, double direction, double speed, double lifetime, int width,
+                      int height) {
         this(path);
         this.position.x = x;
         this.position.y = y;
@@ -64,6 +61,6 @@ public class Projectile extends Entity {
 
     @Override
     public void render(Graphics2D ctx) {
-        ctx.drawImage(this.img, (int) position.x, (int) position.y, (int) this.width, (int) this.height, null);
+        ctx.drawImage(this.img, (int) (position.x - this.width / 2.0), (int) (position.y - this.height / 2.0), (int) this.width, (int) this.height, null);
     }
 }

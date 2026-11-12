@@ -18,7 +18,9 @@ public class GameContext {
     private final InputManager input = new InputManager();
     private final Renderer renderer = new Renderer();
 
+    // image assets
     private final BufferedImage bg = AssetLoader.loadTexture("bg.png");
+    private final BufferedImage heart = AssetLoader.loadTexture("heart.png");
 
     private Camera camera;
     private Player player = new Player();
@@ -104,12 +106,17 @@ public class GameContext {
 
         // update player and enemies
         player.update(dt);
+
         for (Enemy e : enemies) {
             e.update(dt);
-            Projectile p = e.shootProjectile(e.angleTowards(player));
-            if(p != null) enemyProjectiles.add(p);
+
+            var projectiles = e.shootProjectiles(e.angleTowards(player));
+            if (projectiles != null) {
+                enemyProjectiles.addAll(projectiles);
+            }
         }
 
+        // Move camera
         final var bbox = player.getBbox();
         final var centerX = player.getX() + bbox.w() / 2.0;
         final var centerY = player.getY() + bbox.h() / 2.0;
@@ -200,8 +207,13 @@ public class GameContext {
 
             r.drawString("SCORE: " + points, 0, 24);
 
-            int x = input.getMouseX();
-            int y = input.getMouseY();
+            for (int i = 0; i < player.getHealth(); i++) {
+                r.drawImage(heart, 20 * i, 30, 30, 30);
+            }
+
+            // TODO: use mouse coordinates? i dont think a mouse indicator is necessary, might not need this at all
+//            int x = input.getMouseX();
+//            int y = input.getMouseY();
         }
     }
 

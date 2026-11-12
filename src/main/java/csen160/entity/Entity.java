@@ -2,12 +2,16 @@ package csen160.entity;
 
 import csen160.core.*;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 public abstract class Entity {
     Point2D.Double position = new Point2D.Double();
+
+    int width;
+    int height;
+
     BufferedImage img;
     public double rotation;
 
@@ -15,8 +19,13 @@ public abstract class Entity {
     int health;
     double speed;
 
+
     public Entity(String imagePath) {
         this.img = AssetLoader.loadTexture(imagePath);
+
+        this.width = 50;
+        this.height = 50;
+
         this.maxHealth = 1; // default for now
         this.health = this.maxHealth;
         this.speed = 200; // default for now
@@ -24,7 +33,10 @@ public abstract class Entity {
 
     public void move(double dx, double dy, double dt) {
         // normalize
+
         double magnitude = Math.sqrt(dx * dx + dy * dy);
+        if (magnitude == 0) return;
+
         dx /= magnitude;
         dy /= magnitude;
 
@@ -39,8 +51,7 @@ public abstract class Entity {
 
     public Projectile shootProjectile(double deg) {
         final var bounds = getBbox();
-        return new Projectile(this.position.x + bounds.w() / 2.0, this.position.y + bounds.h() / 2.0,
-                deg);
+        return new Projectile(this.position.x, this.position.y, deg);
     }
 
     public boolean takeDamage() {
@@ -48,15 +59,9 @@ public abstract class Entity {
         return this.health <= 0;
     }
 
-    public double angleTowards(Entity other){
-        final var centerX = this.getX() + this.getBbox().w() / 2.0;
-        final var centerY = this.getY() + this.getBbox().h() / 2.0;
-
-        final var otherCenterX = other.getX() + other.getBbox().w() / 2.0;
-        final var otherCenterY = other.getY() + other.getBbox().h() / 2.0;
-
-        final var dy = otherCenterY - centerX;
-        final var dx = otherCenterX - centerX;
+    public double angleTowards(Entity other) {
+        final var dx = other.getX() - this.position.x;
+        final var dy = other.getY() - this.position.y;
         return Math.toDegrees(Math.atan2(dy, dx));
     }
 
@@ -66,6 +71,14 @@ public abstract class Entity {
 
     public int getY() {
         return (int) this.position.y;
+    }
+
+    public int getWidth() {
+        return (int) this.width;
+    }
+
+    public int getHeight() {
+        return (int) this.height;
     }
 
     public int getMaxHealth() {
