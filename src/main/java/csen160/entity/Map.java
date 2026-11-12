@@ -10,8 +10,13 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-class Tile {
-    public static final String BASE_PATH = "/PiratePack/PNG/Tiles/";
+class TileSet {
+    public record Region(int x, int y, int w, int h) {}
+ 
+    public static final String SHEET_PATH = "/PiratePack/Tilesheet/tiles_sheet.png";
+    public static final int TILE_SIZE = 64;
+    public static final int SHEET_COLUMNS = 16;
+    public static final int SHEET_ROWS = 6;
  
     public static final int TILE_SAND_CORNER_TL = 1;
     public static final int TILE_SAND_EDGE_TOP = 2;
@@ -131,39 +136,43 @@ class Tile {
     public static final int TILE_ROAD_V_BULGE = 95;
     public static final int TILE_ROAD_H_BULGE = 96;
  
-    public static final HashMap<Integer, String> PATHS = new HashMap<>();
+    public static final HashMap<Integer, Region> REGIONS = new HashMap<>();
+    private static final int[] SRC_X = new int[SHEET_COLUMNS * SHEET_ROWS + 1];
+    private static final int[] SRC_Y = new int[SHEET_COLUMNS * SHEET_ROWS + 1];
+    public static final BufferedImage SPRITESHEET;
  
     static {
-        for (int i = 1; i <= 96; i++) {
-            PATHS.put(i, BASE_PATH + String.format("tile_%02d.png", i));
+        for (int tile = 1; tile <= SHEET_COLUMNS * SHEET_ROWS; tile++) {
+            final var index = tile - 1;
+            REGIONS.put(tile, new Region(
+                    (index % SHEET_COLUMNS) * TILE_SIZE,
+                    (index / SHEET_COLUMNS) * TILE_SIZE,
+                    TILE_SIZE, TILE_SIZE));
         }
+
+        for (int t = 1; t < SRC_X.length; t++) {
+            SRC_X[t] = ((t - 1) % SHEET_COLUMNS) * TILE_SIZE;
+            SRC_Y[t] = ((t - 1) / SHEET_COLUMNS) * TILE_SIZE;
+        }
+
+        SPRITESHEET = AssetLoader.loadTexture(SHEET_PATH);
     }
-    public static double TILE_WIDTH = 32;
-    public static double TILE_HEIGHT = 32;
-
-    // DO NOT USE Point2D, this needs to be performant
-    private double x;
-    private double y;
-    private BufferedImage img;
-    private int type;
-
-    public Tile(double x, double y, int type) {
-        this.x = x;
-        this.y = y;
-        this.img = AssetLoader.loadTexture(PATHS.get(type));
-        this.type = type;
+ 
+    public static Region region(int tile) {
+        return REGIONS.get(tile);
     }
 
-    public BBox getBBox() {
-        return new BBox(x + TILE_WIDTH / 2.0, y + TILE_HEIGHT / 2.0, TILE_WIDTH, TILE_HEIGHT);
-    }
+    public static void draw(Graphics2D g, BufferedImage sheet, int tile, int dx, int dy) {
+        final var sx = SRC_X[tile];
+        final var sy = SRC_Y[tile];
 
+        g.drawImage(sheet, dx, dy, dx + TILE_SIZE, dy + TILE_SIZE, sx, sy, sx + TILE_SIZE, sy + TILE_SIZE, null);
+    }
+}
+
+record Tile(double x, double y, TileSet.Region region, int code) {
     public void render(Graphics2D g) {
-        g.drawImage(img, (int)x, (int)y, (int)TILE_WIDTH, (int)TILE_HEIGHT, null);
-    }
-
-    public int getType() {
-        return type;
+        TileSet.draw(g, TileSet.SPRITESHEET, code, (int)x, (int)y);
     }
 }
 
@@ -190,16 +199,17 @@ public class Map {
                         final var code = Integer.parseInt(tile_code);
                         // sentinel tile
                         if (code != 0) {
-                            final var tile = new Tile(x, y, code);
+                            final var region = TileSet.region(code);
+                            final var tile = new Tile(x, y, region, code);
                             
                             tiles.add(tile);
                         }
-                        x += Tile.TILE_WIDTH;
+                        x += TileSet.TILE_SIZE;
                     }
                 }
 
                 x = 0.0;
-                y += Tile.TILE_HEIGHT;
+                y += TileSet.TILE_SIZE;
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load \"" + path + "\"", e);
