@@ -19,7 +19,7 @@ public class AssetLoader {
     private static HashMap<String, BufferedImage> textures = new HashMap<>();
     private static HashMap<String, Clip> sounds = new HashMap<>();
 
-    private static InputStream getResourceStream(String path) {
+    public static InputStream getResourceStream(String path) {
         final var stream = App.class.getResourceAsStream(path);
 
         return Objects.requireNonNull(stream);

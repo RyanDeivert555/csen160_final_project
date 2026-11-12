@@ -9,7 +9,6 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameContext {
     // engine variables
@@ -20,8 +19,6 @@ public class GameContext {
     private final InputManager input = new InputManager();
     private final Renderer renderer = new Renderer();
 
-    // image assets
-    private final BufferedImage bg = AssetLoader.loadTexture("bg.png");
     private final BufferedImage heart = AssetLoader.loadTexture("heart.png");
 
     // Entities
@@ -30,6 +27,7 @@ public class GameContext {
     private HashSet<Enemy> enemies = new HashSet<>();
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
     private HashSet<Projectile> enemyProjectiles = new HashSet<>();
+    private Map map = Map.fromFile("/test_map.txt").addLayer("/test_layer.txt");
 
     // game variables
     private final SpawnManager spawner = new SpawnManager(-400, 400, -400, 400); // TODO: properly establish size
@@ -162,7 +160,8 @@ public class GameContext {
                     break;
                 }
             }
-            if (expired || hit) it.remove();
+            if (expired || hit)
+                it.remove();
         }
 
         // move all enemy projectiles, damage player if hit
@@ -198,6 +197,9 @@ public class GameContext {
 
             // world drawing
             r.useCamera(camera);
+
+            // r.drawImage(bg, 0, 0);
+            r.drawMap(map);
 
             r.drawImage(player);
             for (final var e : enemies) {
