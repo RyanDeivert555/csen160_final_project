@@ -1,6 +1,7 @@
 package csen160.core;
 
 import csen160.entity.Entity;
+import csen160.entity.Map;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -57,7 +58,11 @@ public class Renderer extends Canvas {
             e.render(graphics);
         }
 
-        public void drawString(String t, int x, int y){
+        public void drawMap(Map m) {
+            m.render(graphics);
+        }
+
+        public void drawString(String t, int x, int y) {
             graphics.setColor(Color.WHITE);
             graphics.setFont(new Font("comic sans ms", Font.BOLD, 24));
             graphics.drawString(t, x, y);

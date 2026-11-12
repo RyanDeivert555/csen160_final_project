@@ -9,7 +9,6 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameContext {
     private boolean running;
@@ -27,6 +26,7 @@ public class GameContext {
     private HashSet<Enemy> enemies = new HashSet<>();
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
     private HashSet<Projectile> enemyProjectiles = new HashSet<>();
+    private Map map = Map.fromFile("/test_map.txt").addLayer("/test_layer.txt");
 
     private int points = 0;
 
@@ -152,7 +152,8 @@ public class GameContext {
                     break;
                 }
             }
-            if (expired || hit) it.remove();
+            if (expired || hit)
+                it.remove();
         }
 
         // move all enemy projectiles, damage player if hit
@@ -170,7 +171,8 @@ public class GameContext {
                 }
             }
 
-            if (expired || hit) it.remove();
+            if (expired || hit)
+                it.remove();
         }
 
         // shoot
@@ -189,7 +191,8 @@ public class GameContext {
             // world drawing
             r.useCamera(camera);
 
-            r.drawImage(bg, 0, 0);
+            // r.drawImage(bg, 0, 0);
+            r.drawMap(map);
 
             r.drawImage(player);
             for (final var e : enemies) {
@@ -210,10 +213,6 @@ public class GameContext {
             for (int i = 0; i < player.getHealth(); i++) {
                 r.drawImage(heart, 20 * i, 30, 30, 30);
             }
-
-            // TODO: use mouse coordinates? i dont think a mouse indicator is necessary, might not need this at all
-//            int x = input.getMouseX();
-//            int y = input.getMouseY();
         }
     }
 
