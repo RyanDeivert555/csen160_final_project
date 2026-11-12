@@ -12,9 +12,11 @@ import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameContext {
+    // engine variables
     private boolean running;
     private double fps;
     private double fixedDeltaTime;
+
     private final InputManager input = new InputManager();
     private final Renderer renderer = new Renderer();
 
@@ -22,12 +24,16 @@ public class GameContext {
     private final BufferedImage bg = AssetLoader.loadTexture("bg.png");
     private final BufferedImage heart = AssetLoader.loadTexture("heart.png");
 
+    // Entities
     private Camera camera;
     private Player player = new Player();
     private HashSet<Enemy> enemies = new HashSet<>();
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
     private HashSet<Projectile> enemyProjectiles = new HashSet<>();
 
+    // game variables
+    private final SpawnManager spawner = new SpawnManager(-400, 400, -400, 400); // TODO: properly establish size
+    private final int maxEnemyCount = 120;
     private int points = 0;
 
     public GameContext(double fps) {
@@ -58,10 +64,6 @@ public class GameContext {
         long lastTime = System.nanoTime();
         double accum = 0.0;
         final double nsPerTick = 1_000_000_000.0 / fps;
-
-        Enemy e = new Enemy();
-        enemies.add(e);
-        e.teleport(200, 200);
 
         while (running) {
             final long now = System.nanoTime();
@@ -104,12 +106,20 @@ public class GameContext {
             player.move(1, 0, dt);
         }
 
-        // update player and enemies
+        // update player
         player.update(dt);
 
+        // spawn new enemies
+        if (enemies.size() < maxEnemyCount) {
+            var newEnemies = spawner.spawnEnemies(dt);
+            if (newEnemies != null) enemies.addAll(newEnemies);
+        }
+
+        // update enemies
         for (Enemy e : enemies) {
             e.update(dt);
 
+            if(e.getDistance(player) > e.getRange()) continue; // don't shoot if player is too far away
             var projectiles = e.shootProjectiles(e.angleTowards(player));
             if (projectiles != null) {
                 enemyProjectiles.addAll(projectiles);
@@ -167,13 +177,13 @@ public class GameContext {
                 hit = true;
                 if (player.takeDamage()) {
                     // TODO: defeated -> game over ?
+                    System.out.println("Player defeated!");
                 }
             }
-
             if (expired || hit) it.remove();
         }
 
-        // shoot
+        // left click down -> create new player projectile
         if (input.isMouseDown(MouseEvent.BUTTON1)) {
             Projectile p = player.shootProjectile(player.rotation);
             if (p != null)
@@ -188,8 +198,6 @@ public class GameContext {
 
             // world drawing
             r.useCamera(camera);
-
-            r.drawImage(bg, 0, 0);
 
             r.drawImage(player);
             for (final var e : enemies) {
@@ -210,10 +218,6 @@ public class GameContext {
             for (int i = 0; i < player.getHealth(); i++) {
                 r.drawImage(heart, 20 * i, 30, 30, 30);
             }
-
-            // TODO: use mouse coordinates? i dont think a mouse indicator is necessary, might not need this at all
-//            int x = input.getMouseX();
-//            int y = input.getMouseY();
         }
     }
 
