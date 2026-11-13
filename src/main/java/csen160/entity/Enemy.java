@@ -20,6 +20,16 @@ public class Enemy extends Entity {
     private double targetY;
     private double movementTimer;
 
+    private static Map map;
+
+    public static void setMap(Map m) {
+        map = m;
+    }
+
+    public boolean isBlocked() {
+        return map.isBlocked(getX(), getY(), getWidth(), getHeight());
+    }
+
     private enum MovementBehavior {
         WANDER,
         APPROACH,
@@ -33,7 +43,8 @@ public class Enemy extends Entity {
         super("/temp.png");
     }
 
-    public Enemy(String imagePath, int width, int height, int maxHealth, double speed, String projectilePattern, double fireRate, double projectileSpeed, boolean randomAim) {
+    public Enemy(String imagePath, int width, int height, int maxHealth, double speed, String projectilePattern,
+            double fireRate, double projectileSpeed, boolean randomAim) {
         super(imagePath, width, height, maxHealth, speed);
         this.projectilePattern = projectilePattern;
         this.fireRate = fireRate;
@@ -60,8 +71,7 @@ public class Enemy extends Entity {
 
         double distanceToPlayer = Point2D.distance(
                 xPos, yPos,
-                playerX, playerY
-        );
+                playerX, playerY);
 
         boolean playerNearby = distanceToPlayer <= range;
 
@@ -70,8 +80,7 @@ public class Enemy extends Entity {
 
         double distanceToTarget = Point2D.distance(
                 xPos, yPos,
-                targetX, targetY
-        );
+                targetX, targetY);
 
         if (movementTimer <= 0 || distanceToTarget < 10) {
             chooseWaypoint(playerX, playerY, playerNearby);
@@ -89,10 +98,24 @@ public class Enemy extends Entity {
             double moveX = dx / length;
             double moveY = dy / length;
 
-            xPos += moveX * speed * dt;
-            yPos += moveY * speed * dt;
+            final double stepX = moveX * speed * dt;
+            final double stepY = moveY * speed * dt;
 
-            // Face movement direction
+            if (map == null) {
+                position.x += stepX;
+                position.y += stepY;
+            } else {
+                final double oldX = position.x;
+                final double oldY = position.y;
+                xPos = map.moveX(oldX, oldY, width, height, stepX);
+                yPos = map.moveY(xPos, oldY, width, height, stepY);
+
+                // Hit land or a rock: pick a new waypoint next frame instead of pushing into it
+                if (Math.abs(xPos - oldX - stepX) > 1e-9 || Math.abs(yPos - oldY - stepY) > 1e-9) {
+                    movementTimer = 0;
+                }
+            }
+
             rotation = Math.toDegrees(Math.atan2(moveY, moveX)) + 270;
         }
     }
@@ -151,6 +174,21 @@ public class Enemy extends Entity {
                 targetY = yPos + Math.sin(angle) * distance;
                 break;
         }
+
+        // Do not aim at land: retry a few random wander targets, otherwise stay put
+        if (map != null && map.isBlocked(targetX, targetY, width, height)) {
+            for (int i = 0; i < 8; i++) {
+                final double a = Math.random() * Math.PI * 2;
+                final double d = 75 + Math.random() * 150;
+                targetX = position.x + Math.cos(a) * d;
+                targetY = position.y + Math.sin(a) * d;
+                if (!map.isBlocked(targetX, targetY, width, height)) {
+                    return;
+                }
+            }
+            targetX = position.x;
+            targetY = position.y;
+        }
     }
 
     @Override
@@ -166,14 +204,16 @@ public class Enemy extends Entity {
 
     public HashSet<Projectile> shootProjectiles(double deg) {
 
-        if (!canFire) return null;
+        if (!canFire)
+            return null;
         canFire = false;
         fireTimer = 0;
 
         HashSet<Projectile> projectiles = new HashSet<>();
 
         double modifiedDeg = Math.random() * 10.0 - 5.0 + deg;
-        if (randomAim) modifiedDeg = Math.random() * 360.0;
+        if (randomAim)
+            modifiedDeg = Math.random() * 360.0;
 
         switch (projectilePattern) {
             case "CIRCLE":

@@ -101,7 +101,6 @@ public class GameContext {
 
         final var dt = getDeltaTime();
 
-        // move player
         if (input.isKeyDown(KeyEvent.VK_W)) {
             player.move(0, -1, dt);
         }
@@ -117,11 +116,12 @@ public class GameContext {
 
         // update player
         player.update(dt);
-//        System.out.println("Player: " + player.getX() + ", " + player.getY());
+        // System.out.println("Player: " + player.getX() + ", " + player.getY());
         // spawn new enemies
         if (enemies.size() < maxEnemyCount && spawningEnabled) {
             var newEnemies = spawner.spawnEnemies(dt);
-            if (newEnemies != null) enemies.addAll(newEnemies);
+            if (newEnemies != null)
+                enemies.addAll(newEnemies);
         }
 
         // update enemies
@@ -130,7 +130,8 @@ public class GameContext {
         for (Enemy e : enemies) {
             e.update(dt, snapshotX, snapshotY);
 
-            if (e.getDistance(player) > e.getRange()) continue; // don't shoot if player is too far away
+            if (e.getDistance(player) > e.getRange())
+                continue; // don't shoot if player is too far away
             var projectiles = e.shootProjectiles(e.angleTowards(player));
             if (projectiles != null) {
                 enemyProjectiles.addAll(projectiles);
@@ -139,20 +140,14 @@ public class GameContext {
 
         // Move camera
         final var bbox = player.getBbox();
-        final var centerX = player.getX() + bbox.w() / 2.0;
-        final var centerY = player.getY() + bbox.h() / 2.0;
 
         camera.setViewSize(renderer.getWidth(), renderer.getHeight());
-
-        if (!bossFightActive) {
-            camera.setPosition(centerX, centerY);
-        }
+        if (!bossFightActive)
+          camera.setPosition(bbox.x(), bbox.y());
 
         final var mouseWorld = camera.screenToWorld(input.getMouseX(), input.getMouseY());
-        final var dx = mouseWorld.x - centerX;
-        final var dy = mouseWorld.y - centerY;
-
-
+        final var dx = mouseWorld.x - bbox.x();
+        final var dy = mouseWorld.y - bbox.y();
         player.rotation = Math.toDegrees(Math.atan2(dy, dx));
 
         // move all player projectiles, destroy if lifetime elapsed
@@ -214,7 +209,8 @@ public class GameContext {
                     System.out.println("Player defeated!");
                 }
             }
-            if (expired || hit) it.remove();
+            if (expired || hit)
+                it.remove();
         }
 
         // left click down -> create new player projectile
