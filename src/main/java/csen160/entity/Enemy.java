@@ -59,7 +59,7 @@ public class Enemy extends Entity {
         }
 
         double distanceToPlayer = Point2D.distance(
-                position.x, position.y,
+                xPos, yPos,
                 playerX, playerY
         );
 
@@ -69,7 +69,7 @@ public class Enemy extends Entity {
         movementTimer -= dt;
 
         double distanceToTarget = Point2D.distance(
-                position.x, position.y,
+                xPos, yPos,
                 targetX, targetY
         );
 
@@ -80,8 +80,8 @@ public class Enemy extends Entity {
         }
 
         // Move toward waypoint
-        double dx = targetX - position.x;
-        double dy = targetY - position.y;
+        double dx = targetX - xPos;
+        double dy = targetY - yPos;
 
         double length = Math.hypot(dx, dy);
 
@@ -89,9 +89,8 @@ public class Enemy extends Entity {
             double moveX = dx / length;
             double moveY = dy / length;
 
-            double movementSpeed = 100.0;
-            position.x += moveX * movementSpeed * dt;
-            position.y += moveY * movementSpeed * dt;
+            xPos += moveX * speed * dt;
+            yPos += moveY * speed * dt;
 
             // Face movement direction
             rotation = Math.toDegrees(Math.atan2(moveY, moveX)) + 270;
@@ -124,39 +123,39 @@ public class Enemy extends Entity {
 
         switch (behavior) {
             case APPROACH:
-                targetX = position.x + (playerX - position.x) * 0.4;
-                targetY = position.y + (playerY - position.y) * 0.4;
+                targetX = xPos + (playerX - xPos) * 0.4;
+                targetY = yPos + (playerY - yPos) * 0.4;
                 break;
 
             case RETREAT:
-                double dx = position.x - playerX;
-                double dy = position.y - playerY;
+                double dx = xPos - playerX;
+                double dy = yPos - playerY;
                 double length = Math.max(1, Math.hypot(dx, dy));
 
-                targetX = position.x + dx / length * distance;
-                targetY = position.y + dy / length * distance;
+                targetX = xPos + dx / length * distance;
+                targetY = yPos + dy / length * distance;
                 break;
 
             case STRAFE:
-                double px = playerX - position.x;
-                double py = playerY - position.y;
+                double px = playerX - xPos;
+                double py = playerY - yPos;
                 double len = Math.max(1, Math.hypot(px, py));
 
-                targetX = position.x - py / len * distance * strafeDirection;
-                targetY = position.y + px / len * distance * strafeDirection;
+                targetX = xPos - py / len * distance * strafeDirection;
+                targetY = yPos + px / len * distance * strafeDirection;
                 break;
 
             case WANDER:
             default:
-                targetX = position.x + Math.cos(angle) * distance;
-                targetY = position.y + Math.sin(angle) * distance;
+                targetX = xPos + Math.cos(angle) * distance;
+                targetY = yPos + Math.sin(angle) * distance;
                 break;
         }
     }
 
     @Override
     public Projectile shootProjectile(double deg) {
-        return new Projectile("/evilProjectile.png", position.x, position.y,
+        return new Projectile("/evilProjectile.png", xPos, yPos,
                 deg, projectileSpeed, 5, 10, 10);
     }
 
@@ -188,7 +187,7 @@ public class Enemy extends Entity {
                 final double arcSpread = 90.0;
                 for (int i = 0; i < arcCount; i++) {
                     double offset = (-arcSpread / 2.0) + i * arcSpread / (arcCount - 1);
-                    projectiles.add(shootProjectile(modifiedDeg + offset, position.x, position.y));
+                    projectiles.add(shootProjectile(modifiedDeg + offset, xPos, yPos));
                 }
                 break;
             case "WALL":
@@ -202,8 +201,8 @@ public class Enemy extends Entity {
 
                 for (int i = 0; i < wallCount; i++) {
                     double offset = (i - (wallCount - 1) / 2.0) * spacing;
-                    double spawnX = position.x + perpX * offset;
-                    double spawnY = position.y + perpY * offset;
+                    double spawnX = xPos + perpX * offset;
+                    double spawnY = yPos + perpY * offset;
                     projectiles.add(shootProjectile(modifiedDeg, spawnX, spawnY));
                 }
                 break;
@@ -225,16 +224,16 @@ public class Enemy extends Entity {
 
     @Override
     public BBox getBbox() {
-        return new BBox(position.x, position.y, this.width, this.height);
+        return new BBox(xPos, yPos, this.width, this.height);
     }
 
     @Override
     public void render(Graphics2D ctx) {
         final var tempCtx = (Graphics2D) ctx.create();
 
-        tempCtx.rotate(Math.toRadians(rotation), position.x, position.y);
+        tempCtx.rotate(Math.toRadians(rotation), xPos, yPos);
 
-        tempCtx.drawImage(img, (int) position.x - width / 2, (int) position.y - height / 2, this.width, this.height, null);
+        tempCtx.drawImage(img, (int) xPos - width / 2, (int) yPos - height / 2, this.width, this.height, null);
 
         tempCtx.dispose();
     }

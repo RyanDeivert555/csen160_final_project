@@ -1,7 +1,6 @@
 package csen160.core;
 
 import csen160.entity.Enemy;
-import csen160.entity.Projectile;
 
 import java.util.*;
 

@@ -3,13 +3,12 @@ package csen160.entity;
 import csen160.core.*;
 
 import java.awt.*;
-import java.awt.geom.Ellipse2D;
 import java.util.HashSet;
 
 public class Player extends Entity {
     private static String path = "/player.png";
 
-    private final double fireRate = 12.0; // per second
+    private final double fireRate = 18.0; // per second
     private double fireTimer = 0;
     private boolean canFire = false;
     private int projectileCount = 1;
@@ -26,10 +25,10 @@ public class Player extends Entity {
         super(path);
 
         this.maxHealth = 10;
-        this.health = 5;
+        this.health = 10;
 
-        this.position.x = 1250;
-        this.position.y = 750;
+        this.xPos = 1250;
+        this.yPos = 750;
     }
 
     public void update(double dt) {
@@ -47,7 +46,7 @@ public class Player extends Entity {
         this.canFire = false;
         this.fireTimer = 0;
 
-        return new Projectile("/projectile.png", position.x, position.y, deg, 500, 1, 10, 10);
+        return new Projectile("/projectile.png", xPos, yPos, deg, 500, 1, 10, 10);
     }
 
     public HashSet<Projectile> shootProjectiles(double deg) {
@@ -80,11 +79,11 @@ public class Player extends Entity {
         double forwardY = Math.sin(rad);
 
         for (double[] offset : offsets) {
-            double x = position.x
+            double x = xPos
                     + perpendicularX * offset[0]
                     + forwardX * offset[1];
 
-            double y = position.y
+            double y = yPos
                     + perpendicularY * offset[0]
                     + forwardY * offset[1];
 
@@ -114,7 +113,7 @@ public class Player extends Entity {
 
     @Override
     public BBox getBbox() {
-        return new BBox(position.x, position.y, this.playerWidth, this.playerHeight);
+        return new BBox(xPos, yPos, this.playerWidth, this.playerHeight);
     }
 
     @Override
@@ -122,18 +121,18 @@ public class Player extends Entity {
         // player is rendered twice as large as the hitbox
         final var tempCtx = (Graphics2D) ctx.create();
 
-        tempCtx.rotate(Math.toRadians(rotation), this.position.x, this.position.y);
+        tempCtx.rotate(Math.toRadians(rotation), this.xPos, this.yPos);
 
         int drawWidth = (int) (playerWidth * imageScale);
         int drawHeight = (int) (playerHeight * imageScale);
-        tempCtx.drawImage(img, (int) (position.x - drawWidth / 2.0), (int) (position.y - drawHeight / 2.0), drawWidth, drawHeight, null);
+        tempCtx.drawImage(img, (int) (xPos - drawWidth / 2.0), (int) (yPos - drawHeight / 2.0), drawWidth, drawHeight, null);
 
         tempCtx.dispose();
 
         // draw hitbox
         ctx.setColor(Color.green);
-        ctx.drawOval((int) position.x - playerWidth / 2, (int) position.y - playerHeight / 2, playerWidth, playerHeight);
-//        Ellipse2D.Double circle = new Ellipse2D.Double(position.x - playerWidth / 2.0, position.y - playerHeight / 2.0, playerWidth, playerHeight);
+        ctx.drawOval((int) xPos - playerWidth / 2, (int) yPos - playerHeight / 2, playerWidth, playerHeight);
+//        Ellipse2D.Double circle = new Ellipse2D.Double(xPos - playerWidth / 2.0, yPos - playerHeight / 2.0, playerWidth, playerHeight);
 //        ctx.fill(circle);
     }
 }

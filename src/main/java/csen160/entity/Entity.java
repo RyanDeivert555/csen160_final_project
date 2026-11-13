@@ -7,8 +7,9 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 public abstract class Entity {
-    Point2D.Double position = new Point2D.Double();
-
+    double xPos;
+    double yPos;
+    
     int width;
     int height;
 
@@ -50,18 +51,18 @@ public abstract class Entity {
         dx /= magnitude;
         dy /= magnitude;
 
-        this.position.x += dx * speed * dt;
-        this.position.y += dy * speed * dt;
+        this.xPos += dx * speed * dt;
+        this.yPos += dy * speed * dt;
     }
 
     public void teleport(int x, int y) {
-        this.position.x = x;
-        this.position.y = y;
+        this.xPos = x;
+        this.yPos = y;
     }
 
     public Projectile shootProjectile(double deg) {
         final var bounds = getBbox();
-        return new Projectile(this.position.x, this.position.y, deg);
+        return new Projectile(this.xPos, this.yPos, deg);
     }
 
     public boolean takeDamage() {
@@ -70,23 +71,23 @@ public abstract class Entity {
     }
 
     public double angleTowards(Entity other) {
-        final var dx = other.getX() - this.position.x;
-        final var dy = other.getY() - this.position.y;
+        final var dx = other.getX() - this.xPos;
+        final var dy = other.getY() - this.yPos;
         return Math.toDegrees(Math.atan2(dy, dx));
     }
 
     public double getDistance(Entity other) {
-        double dx = position.x - other.position.x;
-        double dy = position.y - other.position.y;
+        double dx = xPos - other.xPos;
+        double dy = yPos - other.yPos;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
     public int getX() {
-        return (int) this.position.x;
+        return (int) this.xPos;
     }
 
     public int getY() {
-        return (int) this.position.y;
+        return (int) this.yPos;
     }
 
     public int getWidth() {
