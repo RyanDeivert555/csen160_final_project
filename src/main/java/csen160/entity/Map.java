@@ -230,6 +230,13 @@ public class Map {
     }
 
     public void render(Graphics2D g) {
+        // render underneath with ocean first
+        for (final var tile : tiles) {
+            final var x = tile.x();
+            final var y = tile.y();
+            TileSet.draw(g, TileSet.SPRITESHEET, TileSet.TILE_WATER, (int) x, (int) y);
+        }
+
         for (final var tile : tiles) {
             tile.render(g);
         }
