@@ -4,16 +4,43 @@ import csen160.entity.*;
 
 import java.util.*;
 
+/**
+ * Manages prototype {@link Enemy} archetypes and handles periodic and on-demand
+ * enemy spawning within defined world boundaries.
+ */
 public class SpawnManager {
+
+    /** The minimum x-coordinate bound for valid spawn positions. */
     int minX;
+
+    /** The maximum x-coordinate bound for valid spawn positions. */
     int maxX;
+
+    /** The minimum y-coordinate bound for valid spawn positions. */
     int minY;
+
+    /** The maximum y-coordinate bound for valid spawn positions. */
     int maxY;
 
+    /** The elapsed time in seconds since the last enemy batch spawn occurred. */
     double timeSinceLastSpawn;
 
+    /**
+     * Shared random number generator used for archetype selection, coordinates, and
+     * spawn intervals.
+     */
     private static final Random random = new Random();
+
+    /**
+     * Registry mapping enemy archetype identifiers (e.g., {@code "BASIC"},
+     * {@code "ELITE"}) to prototype instances.
+     */
     public static HashMap<String, Enemy> enemyTypes;
+
+    /**
+     * Cached list of archetype keys from {@link #enemyTypes} for indexed random
+     * lookup.
+     */
     public static List<String> keys;
 
     static {
@@ -88,6 +115,15 @@ public class SpawnManager {
         keys = new ArrayList<>(enemyTypes.keySet());
     }
 
+    /**
+     * Constructs a new {@code SpawnManager} constrained to the specified
+     * rectangular spawn region.
+     *
+     * @param minX the minimum x-coordinate at which enemies may spawn
+     * @param maxX the maximum x-coordinate at which enemies may spawn
+     * @param minY the minimum y-coordinate at which enemies may spawn
+     * @param maxY the maximum y-coordinate at which enemies may spawn
+     */
     public SpawnManager(int minX, int maxX, int minY, int maxY) {
         this.minX = minX;
         this.maxX = maxX;
@@ -96,6 +132,16 @@ public class SpawnManager {
         this.maxY = maxY;
     }
 
+    /**
+     * Creates a single random {@link Enemy} instance cloned from
+     * {@link #enemyTypes} and
+     * attempts up to 99 times to place it at an unblocked position within the spawn
+     * bounds.
+     *
+     * @return a newly positioned, unblocked {@link Enemy}, or {@code null} if no
+     *         valid
+     *         spawn location could be found within the attempt limit
+     */
     public Enemy spawnEnemy() {
         String randomKey = keys.get(random.nextInt(keys.size()));
         Enemy e = new Enemy(enemyTypes.get(randomKey));
@@ -106,10 +152,23 @@ public class SpawnManager {
             e.teleport((int) x, (int) y);
             attempts++;
         } while (e.isBlocked() && attempts < 100);
-        if (e.isBlocked()) return null;
+        if (e.isBlocked())
+            return null;
         return e;
     }
 
+    /**
+     * Advances the spawn timer and, once a randomized cooldown between {@code 1.0}
+     * and {@code 2.5}
+     * seconds has elapsed, attempts to spawn up to 5 enemies of a randomly chosen
+     * archetype
+     * at unblocked positions within the spawn bounds.
+     *
+     * @param dt the elapsed time since the last frame, in seconds
+     * @return a {@link HashSet} containing the newly spawned, unblocked
+     *         {@link Enemy} instances,
+     *         or {@code null} if the spawn cooldown has not yet elapsed
+     */
     public HashSet<Enemy> spawnEnemies(double dt) {
         timeSinceLastSpawn += dt;
         if (timeSinceLastSpawn < random.nextDouble(1.0, 2.5))

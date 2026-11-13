@@ -10,7 +10,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.sound.sampled.Clip;
 
 /**
- * Represents an abstract game entity with a position, size, health, and movement speed.
+ * Represents an abstract game entity with a position, size, health, and
+ * movement speed.
  * Provides common functionality for movement, projectile creation,
  * damage handling, and distance/angle calculations. Subclasses are responsible
  * for defining their bounding box and rendering behavior.
@@ -25,7 +26,6 @@ public abstract class Entity {
      * The entity's vertical position in world coordinates.
      */
     double yPos;
-
 
     /**
      * The entity's width in pixels.
@@ -42,6 +42,10 @@ public abstract class Entity {
      */
     BufferedImage img;
 
+    /**
+     * Preloaded pool of wood impact sound clips played randomly when an entity
+     * takes damage.
+     */
     static List<Clip> HIT_SOUNDS;
     static {
         final var sounds = new ArrayList<Clip>();
@@ -78,6 +82,13 @@ public abstract class Entity {
      */
     double speed;
 
+    /**
+     * Constructs an {@code Entity} with the specified texture and default
+     * attributes
+     * (50x50 dimensions, 1 maximum health, and a speed of 200 pixels per second).
+     *
+     * @param imagePath the classpath resource path to the entity's texture image
+     */
     public Entity(String imagePath) {
         this.img = AssetLoader.loadTexture(imagePath);
 
@@ -89,6 +100,16 @@ public abstract class Entity {
         this.speed = 200; // default for now
     }
 
+    /**
+     * Constructs an {@code Entity} with the specified texture, dimensions, health,
+     * and speed.
+     *
+     * @param imagePath the classpath resource path to the entity's texture image
+     * @param width     the entity's width in pixels
+     * @param height    the entity's height in pixels
+     * @param maxHealth the entity's initial and maximum health
+     * @param speed     the entity's movement speed in pixels per second
+     */
     public Entity(String imagePath, int width, int height, int maxHealth, double speed) {
         this.img = AssetLoader.loadTexture(imagePath);
         this.width = width;
@@ -100,7 +121,8 @@ public abstract class Entity {
 
     /**
      * Moves the entity in the specified direction.
-     * The direction vector is normalized before movement so that diagonal movement does not increase the entity's speed.
+     * The direction vector is normalized before movement so that diagonal movement
+     * does not increase the entity's speed.
      *
      * @param dx the horizontal movement direction
      * @param dy the vertical movement direction
@@ -120,7 +142,10 @@ public abstract class Entity {
     }
 
     /**
-     * Instantaneously move the Entity to specified position.
+     * Instantaneously moves the entity to the specified world position.
+     *
+     * @param x the target horizontal coordinate in world space
+     * @param y the target vertical coordinate in world space
      */
     public void teleport(int x, int y) {
         this.xPos = x;
@@ -138,10 +163,10 @@ public abstract class Entity {
     }
 
     /**
-     * Reduces the entity's health by one.
+     * Plays a random hit sound effect and reduces the entity's health by one.
      *
-     * @return true if the entity's health has reached zero or below;
-     * false otherwise
+     * @return {@code true} if the entity's health has reached zero or below;
+     *         {@code false} otherwise
      */
     public boolean takeDamage() {
         final var idx = ThreadLocalRandom.current().nextInt(HIT_SOUNDS.size());
@@ -182,29 +207,55 @@ public abstract class Entity {
     }
 
     /**
-     * Getters
-     * @return desired field
+     * Returns the entity's horizontal position truncated to an integer.
+     *
+     * @return the entity's x-coordinate in world space
      */
     public int getX() {
         return (int) this.xPos;
     }
 
+    /**
+     * Returns the entity's vertical position truncated to an integer.
+     *
+     * @return the entity's y-coordinate in world space
+     */
     public int getY() {
         return (int) this.yPos;
     }
 
+    /**
+     * Returns the entity's width.
+     *
+     * @return the width in pixels
+     */
     public int getWidth() {
         return this.width;
     }
 
+    /**
+     * Returns the entity's height.
+     *
+     * @return the height in pixels
+     */
     public int getHeight() {
         return this.height;
     }
 
+    /**
+     * Returns the entity's maximum health capacity.
+     *
+     * @return the maximum health value
+     */
     public int getMaxHealth() {
         return this.maxHealth;
     }
 
+    /**
+     * Returns the entity's current remaining health.
+     *
+     * @return the current health value
+     */
     public int getHealth() {
         return this.health;
     }

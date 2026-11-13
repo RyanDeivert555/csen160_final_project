@@ -3,7 +3,6 @@ package csen160.core;
 import csen160.entity.*;
 
 import java.awt.*;
-import java.awt.RenderingHints.Key;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -14,48 +13,117 @@ import java.util.Iterator;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 
+/**
+ * Coordinates the core game loop, fixed-timestep simulation updates, rendering
+ * pipeline,
+ * entity management, collision handling, and state transitions for the game.
+ */
 public class GameContext {
+
+    /**
+     * Represents the high-level execution states of the game.
+     */
     enum GameState {
+        /** Title screen state awaiting player input to begin a game session. */
         MENU,
+        /**
+         * Active gameplay state in which world simulation, combat, and boss fights run.
+         */
         GAME,
+        /** Terminal end-of-game state. */
         END,
     }
 
     // engine variables
+    /** Indicates whether the main game loop should continue running. */
     private boolean running;
+
+    /** Target simulation update rate in ticks/frames per second. */
     private double fps;
+
+    /** Fixed time delta per simulation step, in seconds ({@code 1.0 / fps}). */
     private double fixedDeltaTime;
 
+    /** Input manager polling keyboard and mouse events from the renderer canvas. */
     private final InputManager input = new InputManager();
+
+    /** Double-buffered canvas responsible for rendering world and UI graphics. */
     private final Renderer renderer = new Renderer();
 
+    /** HUD icon texture representing one unit of player health. */
     private final BufferedImage heart = AssetLoader.loadTexture("heart.png");
 
+    /** Current state of the game state machine. */
     private GameState state = GameState.MENU;
 
     // Entities
+    /** Viewport camera handling world-to-screen transforms and visible bounds. */
     private Camera camera;
+
+    /** The player-controlled ship entity. */
     private Player player = new Player();
+
+    /** Active enemy ship entities currently present in the world. */
     private HashSet<Enemy> enemies = new HashSet<>();
+
+    /** Active projectiles fired by the player. */
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
+
+    /** Active projectiles fired by enemies or the boss. */
     private HashSet<Projectile> enemyProjectiles = new HashSet<>();
+
+    /** Active temporary visual effects such as hit explosions. */
     private HashSet<VisualEffect> effects = new HashSet<>();
+
+    /**
+     * Multi-layered tile map defining terrain visuals and solid collision tiles.
+     */
     private Map map = Map.fromFile("/ocean_map_large_ground.txt").addLayer("/ocean_map_large_objects.txt");
 
     // game variables
+    /** Total width of the loaded map in world pixels. */
     int mapSizeX = map.getMapSize().width;
+
+    /** Total height of the loaded map in world pixels. */
     int mapSizeY = map.getMapSize().height;
 
+    /** Manager responsible for spawning enemies within the map boundaries. */
     private final SpawnManager spawner = new SpawnManager(0, mapSizeX, 0, mapSizeY);
+
+    /** Controls whether periodic enemy wave spawning is currently enabled. */
     boolean spawningEnabled = true;
 
+    /** Maximum number of concurrent enemies permitted in the world. */
     private int maxEnemyCount = 240;
+
+    /** Current score accumulated by the player. */
     private int points = 0;
 
+    /**
+     * Flag indicating the player was defeated in standard play and should
+     * transition to the boss fight.
+     */
     boolean triggerPlayerDefeat = false;
+
+    /** Indicates whether the boss arena encounter is currently active. */
     boolean bossFightActive = false;
+
+    /**
+     * The active boss entity during a boss fight, or {@code null} when inactive or
+     * defeated.
+     */
     private Boss theBoss;
 
+    /**
+     * Constructs a new {@code GameContext} configured to run at the specified tick
+     * rate.
+     * Registers input listeners on the {@link Renderer}, initializes the
+     * {@link Camera} and map
+     * bindings, starts looping background music, and populates the initial set of
+     * enemies.
+     *
+     * @param fps the target simulation update rate in frames per second
+     */
     public GameContext(double fps) {
         running = true;
         this.fps = fps;
@@ -83,18 +151,39 @@ public class GameContext {
         }
     }
 
+    /**
+     * Constructs a new {@code GameContext} with a default simulation rate of
+     * {@code 60.0} FPS.
+     */
     public GameContext() {
         this(60.0);
     }
 
+    /**
+     * Returns the {@link Renderer} component used to display the game.
+     *
+     * @return the game's {@link Renderer} instance
+     */
     public Renderer getRenderer() {
         return renderer;
     }
 
+    /**
+     * Returns the fixed simulation time step duration per tick.
+     *
+     * @return the fixed delta time in seconds
+     */
     public double getDeltaTime() {
         return fixedDeltaTime;
     }
 
+    /**
+     * Starts and executes the main fixed-timestep game loop until {@link #running}
+     * is set to
+     * {@code false}. Accumulates elapsed wall-clock time to step {@link #update()}
+     * at a steady
+     * rate while rendering each frame and yielding briefly via {@link #sleep()}.
+     */
     public void run() {
         renderer.requestFocusInWindow();
         long lastTime = System.nanoTime();
@@ -120,6 +209,14 @@ public class GameContext {
         }
     }
 
+    /**
+     * Advances the game simulation by one fixed time step.
+     * Handles state transitions, WASD player movement, mouse aiming, enemy spawning
+     * and AI,
+     * camera clamping, projectile movement and collision checks, visual effect
+     * lifespans,
+     * and boss fight setup and arena bounds.
+     */
     private void update() {
         if (input.isKeyDown(KeyEvent.VK_ESCAPE)) {
             running = false;
@@ -331,6 +428,14 @@ public class GameContext {
         }
     }
 
+    /**
+     * Renders the current frame to the {@link Renderer} buffer.
+     * In {@link GameState#MENU}, draws the background map and start prompt;
+     * otherwise
+     * renders all world-space entities under the active {@link Camera} transform
+     * followed
+     * by screen-space HUD elements (score and player health hearts).
+     */
     private void render() {
         try (final var r = renderer.getContext()) {
             if (state == GameState.MENU) {
@@ -376,6 +481,11 @@ public class GameContext {
         }
     }
 
+    /**
+     * Pauses the game loop thread for 1 millisecond to avoid busy-waiting CPU
+     * usage.
+     * Restores the interrupt flag and halts the loop if interrupted.
+     */
     private void sleep() {
         try {
             // How long the thread sleeps for doesn't really matter, it can be inaccurate
