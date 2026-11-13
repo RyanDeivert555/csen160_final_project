@@ -3,6 +3,7 @@ package csen160.core;
 import csen160.entity.*;
 
 import java.awt.*;
+import java.awt.RenderingHints.Key;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -14,6 +15,12 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 
 public class GameContext {
+    enum GameState {
+        MENU,
+        GAME,
+        END,
+    }
+
     // engine variables
     private boolean running;
     private double fps;
@@ -23,6 +30,8 @@ public class GameContext {
     private final Renderer renderer = new Renderer();
 
     private final BufferedImage heart = AssetLoader.loadTexture("heart.png");
+
+    private GameState state = GameState.MENU;
 
     // Entities
     private Camera camera;
@@ -115,6 +124,13 @@ public class GameContext {
         if (input.isKeyDown(KeyEvent.VK_ESCAPE)) {
             running = false;
             return;
+        }
+
+        if (state == GameState.MENU) {
+            if (input.isKeyDown(KeyEvent.VK_SPACE)) {
+                state = GameState.GAME;
+                return;
+            }
         }
 
         final var dt = getDeltaTime();
@@ -248,7 +264,12 @@ public class GameContext {
                         spawningEnabled = false;
                         triggerPlayerDefeat = true;
                     } else {
-                        // TODO: GAME OVER
+                        state = GameState.MENU;
+                        player.reset();
+                        player.teleport(256, 256);
+                        bossFightActive = false;
+                        spawningEnabled = true;
+                        triggerPlayerDefeat = false;
                     }
                 }
                 effects.add(new VisualEffect("/PiratePack/PNG/Effects/explosion3.png", 20, 20, p.getX(), p.getY(), .4));
@@ -276,6 +297,7 @@ public class GameContext {
             theBoss = new Boss();
             camera.setPosition(theBoss.getX(), theBoss.getY());
             player.teleport(theBoss.getX(), theBoss.getY() + 200);
+            player.reset();
             bossFightActive = true;
         }
 
@@ -309,13 +331,19 @@ public class GameContext {
 
     private void render() {
         try (final var r = renderer.getContext()) {
+            if (state == GameState.MENU) {
+                r.drawMap(map);
+                r.setColor(Color.BLACK);
+                r.drawString("PRESS SPACE TO START!", 200, 200);
+                return;
+            }
+
             r.setColor(Color.BLACK);
             r.clearBackground();
 
             // world drawing
             r.useCamera(camera);
 
-            // r.drawImage(bg, 0, 0);
             r.drawMap(map);
 
             r.drawImage(player);

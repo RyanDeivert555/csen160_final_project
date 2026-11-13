@@ -37,6 +37,10 @@ public class Player extends Entity {
         this.map = map;
     }
 
+    public void reset() {
+        this.health = this.maxHealth;
+    }
+
     public void moveAndCollide(Map map, double dx, double dy) {
         xPos = map.moveX(xPos, yPos, playerWidth, playerHeight, dx);
         yPos = map.moveY(xPos, yPos, playerWidth, playerHeight, dy);
