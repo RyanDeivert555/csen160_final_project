@@ -6,14 +6,16 @@ import java.awt.*;
 import java.util.HashSet;
 
 public class Boss extends Entity {
-    double fireRate = 1.0;
     double fireTimer;
     boolean canFire;
     double projectileSpeed = 150.0;
 
     int currentAttack = 0;
-    double currentAttackTimer;
-    double[] attackLengths = {15.0, 15.0, 15.0, 15.0, 15.0, 15.0};
+    double currentAttackTimer = 0;
+    double[] attackLengths = {10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
+    double[] fireRates = {3.0, 5.0, 20.0, 1.5, 4.5, 12.0};
+
+    double attackRotation = 0;
 
     public Boss() {
         super("/boss.png", 200, 200, 50000, 0);
@@ -24,13 +26,15 @@ public class Boss extends Entity {
 
     public void update(double dt) {
         fireTimer += dt;
-        if (!canFire && fireTimer >= 1.0 / fireRate) {
+        if (!canFire && fireTimer >= 1.0 / fireRates[currentAttack]) {
             canFire = true;
         }
 
         currentAttackTimer += dt;
         if (currentAttackTimer >= attackLengths[currentAttack]) {
-            currentAttackTimer = (currentAttackTimer + 1) % attackLengths.length;
+            currentAttack = (currentAttack + 1) % attackLengths.length;
+            currentAttackTimer = 0;
+            attackRotation = 0;
         }
     }
 
@@ -46,7 +50,7 @@ public class Boss extends Entity {
     }
 
     public HashSet<Projectile> shootProjectiles(double deg) {
-        if (!canFire) return null;
+        if (!canFire) return new HashSet<>();;
         canFire = false;
         fireTimer = 0;
 
@@ -55,50 +59,94 @@ public class Boss extends Entity {
         double modifiedDeg = Math.random() * 10.0 - 5.0 + deg;
 
         switch (currentAttack) {
-            case 0:
-                final int circleCount = 8;
-                for (int i = 0; i < circleCount; i++) {
-                    projectiles.add(shootProjectile(modifiedDeg + (360.0 * i / circleCount)));
-                }
-                break;
-            case 1:
-                final int arcCount = 5;
-                final double arcSpread = 90.0;
-                for (int i = 0; i < arcCount; i++) {
-                    double offset = (-arcSpread / 2.0) + i * arcSpread / (arcCount - 1);
-                    projectiles.add(shootProjectile(modifiedDeg + offset, xPos, yPos));
-                }
-                break;
-            case 2:
-                final int wallCount = 5;
-                final double spacing = 10.0;
+            case 0: // Flower Burst
+                int count = 24;
 
-                // get perpendicular angle
+                for (int i = 0; i < count; i++) {
+                    double angle = modifiedDeg + attackRotation
+                            + (360.0 * i / count);
+
+                    projectiles.add(shootProjectile(angle));
+                }
+
+                attackRotation += 12;
+                break;
+
+            case 1: // Aimed Fan
+                int fanCount = 7;
+                double fanSpread = 60;
+
+                for (int i = 0; i < fanCount; i++) {
+                    double offset = -fanSpread / 2
+                            + i * fanSpread / (fanCount - 1);
+
+                    projectiles.add(shootProjectile(modifiedDeg + offset));
+                }
+                break;
+
+            case 2: // Rotating Spiral
+                int spiralCount = 4;
+
+                for (int i = 0; i < spiralCount; i++) {
+                    double angle = modifiedDeg
+                            + attackRotation
+                            + (360.0 * i / spiralCount);
+
+                    projectiles.add(shootProjectile(angle));
+                }
+
+                attackRotation += 15;
+                break;
+
+            case 3: // Bullet Wall
+                int wallCount = 9;
+                double spacing = 30;
+
                 double radians = Math.toRadians(modifiedDeg);
                 double perpX = -Math.sin(radians);
                 double perpY = Math.cos(radians);
 
                 for (int i = 0; i < wallCount; i++) {
-                    double offset = (i - (wallCount - 1) / 2.0) * spacing;
-                    double spawnX = xPos + perpX * offset;
-                    double spawnY = yPos + perpY * offset;
-                    projectiles.add(shootProjectile(modifiedDeg, spawnX, spawnY));
+                    // Leave a gap in the center
+                    if (i == 4) continue;
+
+                    double offset = (i - (wallCount - 1) / 2.0)
+                            * spacing;
+
+                    projectiles.add(shootProjectile(
+                            modifiedDeg,
+                            xPos + perpX * offset,
+                            yPos + perpY * offset
+                    ));
                 }
                 break;
-            case 3:
-                for (int i = 0; i < (int) (Math.random() * 3) + 2; i++) {
-                    double randomAngle = Math.random() * 360.0;
-                    projectiles.add(shootProjectile(randomAngle));
+
+            case 4: // Butterfly
+                int butterflyCount = 6;
+                double butterflySpread = 65;
+
+                for (int i = 0; i < butterflyCount; i++) {
+                    double offset = i * butterflySpread / (butterflyCount - 1);
+
+                    projectiles.add(shootProjectile(
+                            modifiedDeg + offset
+                    ));
+
+                    projectiles.add(shootProjectile(
+                            modifiedDeg - offset
+                    ));
                 }
-            case 4:
-                projectiles.add(shootProjectile(modifiedDeg));
                 break;
-            case 5:
-                break;
-            default:
+            case 5: // Rainfall
+                int rainCount = (int) (Math.random() * 4) + 3;
+
+                for (int i = 0; i < rainCount; i++) {
+                    double angle = Math.random() * 360;
+
+                    projectiles.add(shootProjectile(angle));
+                }
                 break;
         }
-
         return projectiles;
     }
 

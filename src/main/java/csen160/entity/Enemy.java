@@ -102,11 +102,11 @@ public class Enemy extends Entity {
             final double stepY = moveY * speed * dt;
 
             if (map == null) {
-                position.x += stepX;
-                position.y += stepY;
+                xPos += stepX;
+                yPos += stepY;
             } else {
-                final double oldX = position.x;
-                final double oldY = position.y;
+                final double oldX = xPos;
+                final double oldY = yPos;
                 xPos = map.moveX(oldX, oldY, width, height, stepX);
                 yPos = map.moveY(xPos, oldY, width, height, stepY);
 
@@ -180,14 +180,14 @@ public class Enemy extends Entity {
             for (int i = 0; i < 8; i++) {
                 final double a = Math.random() * Math.PI * 2;
                 final double d = 75 + Math.random() * 150;
-                targetX = position.x + Math.cos(a) * d;
-                targetY = position.y + Math.sin(a) * d;
+                targetX = xPos + Math.cos(a) * d;
+                targetY = yPos + Math.sin(a) * d;
                 if (!map.isBlocked(targetX, targetY, width, height)) {
                     return;
                 }
             }
-            targetX = position.x;
-            targetY = position.y;
+            targetX = xPos;
+            targetY = yPos;
         }
     }
 
