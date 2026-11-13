@@ -296,11 +296,10 @@ public class GameContext {
             enemyProjectiles.clear();
             playerProjectiles.clear();
             enemies.clear();
-            player.setHealth(3);
             theBoss = new Boss();
             camera.setPosition(theBoss.getX(), theBoss.getY());
             player.teleport(theBoss.getX(), theBoss.getY() + 200);
-            player.reset();
+            player.setHealth(3);
             bossFightActive = true;
         }
 

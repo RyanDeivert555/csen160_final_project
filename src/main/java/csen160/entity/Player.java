@@ -27,7 +27,7 @@ public class Player extends Entity {
         super(path);
 
         this.maxHealth = 10;
-        this.health = 10;
+        this.health = 7;
 
         xPos = 256;
         yPos = 256;
@@ -38,7 +38,8 @@ public class Player extends Entity {
     }
 
     public void reset() {
-        this.health = this.maxHealth;
+        this.maxHealth = 10;
+        this.health = 7;
     }
 
     public void moveAndCollide(Map map, double dx, double dy) {
@@ -148,6 +149,7 @@ public class Player extends Entity {
      * To be called at the start of the boss fight ONLY
      */
     public void setHealth(int health) {
+        this.maxHealth = 3;
         this.health = health;
     }
 
