@@ -28,8 +28,8 @@ public class Player extends Entity {
         this.maxHealth = 10;
         this.health = 5;
 
-        this.position.x = 500;
-        this.position.y = 500;
+        this.position.x = 1250;
+        this.position.y = 750;
     }
 
     public void update(double dt) {

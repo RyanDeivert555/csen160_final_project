@@ -43,6 +43,12 @@ public class GameContext {
         renderer.addMouseMotionListener(input);
 
         camera = new Camera(new Point2D.Double(), 1.0, renderer.getWidth(), renderer.getHeight());
+
+        // initial enemy set
+        for (int i = 0; i < 45; i++) {
+            Enemy e = spawner.spawnEnemy();
+            if (e != null) enemies.add(e);
+        }
     }
 
     public GameContext() {
@@ -189,7 +195,7 @@ public class GameContext {
         // left click down -> create new player projectile
         if (input.isMouseDown(MouseEvent.BUTTON1)) {
             var ps = player.shootProjectiles(player.rotation);
-            if(ps != null) playerProjectiles.addAll(ps);
+            if (ps != null) playerProjectiles.addAll(ps);
         }
     }
 
