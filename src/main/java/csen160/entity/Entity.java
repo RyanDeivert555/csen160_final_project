@@ -4,6 +4,10 @@ import csen160.core.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import javax.sound.sampled.Clip;
 
 /**
  * Represents an abstract game entity with a position, size, health, and movement speed.
@@ -22,6 +26,7 @@ public abstract class Entity {
      */
     double yPos;
 
+
     /**
      * The entity's width in pixels.
      */
@@ -36,6 +41,22 @@ public abstract class Entity {
      * The image used to render the entity.
      */
     BufferedImage img;
+
+    static final List<Clip> HIT_SOUNDS;
+    static {
+        final var sounds = new ArrayList<Clip>();
+        for (int i = 0; i <= 4; i++) {
+            final var path0 = String.format("/impactWood_light_%03d.wav", i);
+            final var path1 = String.format("/impactWood_medium_%03d.wav", i);
+            final var path2 = String.format("/impactWood_heavy_%03d.wav", i);
+
+            sounds.add(AssetLoader.loadSound(path0));
+            sounds.add(AssetLoader.loadSound(path1));
+            sounds.add(AssetLoader.loadSound(path2));
+        }
+
+        HIT_SOUNDS = sounds;
+    }
 
     /**
      * The entity's current rotation angle in degrees.
@@ -123,6 +144,15 @@ public abstract class Entity {
      * false otherwise
      */
     public boolean takeDamage() {
+        final var idx = ThreadLocalRandom.current().nextInt(HIT_SOUNDS.size());
+        final var clip = HIT_SOUNDS.get(idx);
+
+        if (clip.isRunning()) {
+            clip.stop();
+        }
+        clip.setFramePosition(0);
+        clip.start();
+
         this.health--;
         return this.health <= 0;
     }
