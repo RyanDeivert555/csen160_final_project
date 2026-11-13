@@ -31,7 +31,7 @@ public class GameContext {
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
     private HashSet<Projectile> enemyProjectiles = new HashSet<>();
     private HashSet<VisualEffect> effects = new HashSet<>();
-    private Map map = Map.fromFile("/test_map.txt").addLayer("/test_layer.txt");
+    private Map map = Map.fromFile("/ocean_map_large_ground.txt").addLayer("/ocean_map_large_objects.txt");
 
     // game variables
     int mapSizeX = map.getMapSize().width;
@@ -209,7 +209,8 @@ public class GameContext {
                         maxEnemyCount = (points % 120000) * 10 + 100;
                         enemyIt.remove();
                     }
-                    effects.add(new VisualEffect("/PiratePack/PNG/Effects/explosion1.png", 25, 25, p.getX(), p.getY(), .4));
+                    effects.add(
+                            new VisualEffect("/PiratePack/PNG/Effects/explosion1.png", 25, 25, p.getX(), p.getY(), .4));
                     break;
                 }
             }
@@ -271,8 +272,9 @@ public class GameContext {
             enemyProjectiles.clear();
             playerProjectiles.clear();
             enemies.clear();
-            camera.setPosition(1250, 1050);
             theBoss = new Boss();
+            camera.setPosition(theBoss.getX(), theBoss.getY());
+            player.teleport(theBoss.getX(), theBoss.getY() + 200);
             bossFightActive = true;
         }
 

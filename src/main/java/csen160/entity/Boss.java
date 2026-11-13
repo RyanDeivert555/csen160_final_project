@@ -20,8 +20,8 @@ public class Boss extends Entity {
     public Boss() {
         super("/boss.png", 200, 200, 50000, 0);
 
-        this.xPos = 1250;
-        this.yPos = 750;
+        this.xPos = 3840;
+        this.yPos = 2304;
     }
 
     public void update(double dt) {
