@@ -43,7 +43,9 @@ public class GameContext {
         renderer.addMouseMotionListener(input);
 
         camera = new Camera(new Point2D.Double(), 1.0, renderer.getWidth(), renderer.getHeight());
+        // attach maps
         player.attachMap(map);
+        Enemy.setMap(map);
     }
 
     public GameContext() {
