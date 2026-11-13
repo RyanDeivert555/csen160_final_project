@@ -223,6 +223,7 @@ public class GameContext {
                         // enemy defeated
                         points += 5000000;
                         theBoss = null;
+                        // TODO: call game over here also --> but its a victory
                     }
                     points += 200;
                 }
@@ -273,6 +274,7 @@ public class GameContext {
             enemyProjectiles.clear();
             playerProjectiles.clear();
             enemies.clear();
+            player.setHealth(3);
             theBoss = new Boss();
             camera.setPosition(theBoss.getX(), theBoss.getY());
             player.teleport(theBoss.getX(), theBoss.getY() + 200);
