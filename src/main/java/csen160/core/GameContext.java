@@ -30,8 +30,8 @@ public class GameContext {
     private Map map = Map.fromFile("/test_map.txt").addLayer("/test_layer.txt");
 
     // game variables
-    private final SpawnManager spawner = new SpawnManager(-400, 400, -400, 400); // TODO: properly establish size
-    private final int maxEnemyCount = 120;
+    private final SpawnManager spawner = new SpawnManager(0, 2500, 0, 1500); // TODO: properly establish size
+    private int maxEnemyCount = 100;
     private int points = 0;
 
     public GameContext(double fps) {
@@ -106,7 +106,7 @@ public class GameContext {
 
         // update player
         player.update(dt);
-
+//        System.out.println("Player: " + player.getX() + ", " + player.getY());
         // spawn new enemies
         if (enemies.size() < maxEnemyCount) {
             var newEnemies = spawner.spawnEnemies(dt);
@@ -114,10 +114,12 @@ public class GameContext {
         }
 
         // update enemies
+        double snapshotX = player.getX();
+        double snapshotY = player.getY();
         for (Enemy e : enemies) {
-            e.update(dt);
+            e.update(dt, snapshotX, snapshotY);
 
-            if(e.getDistance(player) > e.getRange()) continue; // don't shoot if player is too far away
+            if (e.getDistance(player) > e.getRange()) continue; // don't shoot if player is too far away
             var projectiles = e.shootProjectiles(e.angleTowards(player));
             if (projectiles != null) {
                 enemyProjectiles.addAll(projectiles);
@@ -155,6 +157,8 @@ public class GameContext {
                     if (e.takeDamage()) {
                         // enemy defeated
                         points = (int) (points + 100 * Math.pow(e.getMaxHealth(), 1.2));
+                        player.setPoints(points);
+                        maxEnemyCount = (points % 120000) * 10 + 100;
                         enemyIt.remove();
                     }
                     break;
@@ -184,9 +188,8 @@ public class GameContext {
 
         // left click down -> create new player projectile
         if (input.isMouseDown(MouseEvent.BUTTON1)) {
-            Projectile p = player.shootProjectile(player.rotation);
-            if (p != null)
-                playerProjectiles.add(p);
+            var ps = player.shootProjectiles(player.rotation);
+            if(ps != null) playerProjectiles.addAll(ps);
         }
     }
 

@@ -4,23 +4,32 @@ import csen160.core.*;
 
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
+import java.util.HashSet;
 
 public class Player extends Entity {
     private static String path = "/player.png";
 
-    private final double fireRate = 10.0; // per second
+    private final double fireRate = 12.0; // per second
     private double fireTimer = 0;
     private boolean canFire = false;
+    private int projectileCount = 1;
 
     private final int playerWidth = 15;
     private final int playerHeight = 15;
-    private final double imageScale  = 3.0;
+    private final double imageScale = 3.0;
+
+    private int points = 0;
+    private int lastHealthMilestone = 0;
+    private int lastProjectileMilestone = 0;
 
     public Player() {
         super(path);
 
         this.maxHealth = 10;
-        this.health = 3;
+        this.health = 5;
+
+        this.position.x = 500;
+        this.position.y = 500;
     }
 
     public void update(double dt) {
@@ -38,8 +47,69 @@ public class Player extends Entity {
         this.canFire = false;
         this.fireTimer = 0;
 
-        return new Projectile("/projectile.png", position.x, position.y,
-                deg, 500, 1, 10, 10);
+        return new Projectile("/projectile.png", position.x, position.y, deg, 500, 1, 10, 10);
+    }
+
+    public HashSet<Projectile> shootProjectiles(double deg) {
+        if (!this.canFire) return null;
+        this.canFire = false;
+        this.fireTimer = 0;
+
+        var projectiles = new HashSet<Projectile>();
+
+        double[][] offsets = switch (projectileCount) {
+            case 2 -> new double[][]{{-5, 0}, {5, 0}};
+            case 3 -> new double[][]{{0, 8},    // Front
+                    {-6, -6},  // Back left
+                    {6, -6}    // Back right
+            };
+            case 4 -> new double[][]{{-5, 5},   // Front left
+                    {5, 5},    // Front right
+                    {-10, -5}, // Back left
+                    {10, -5}   // Back right
+            };
+            default -> new double[][]{{0, 0}};
+        };
+
+        double rad = Math.toRadians(deg);
+
+        double perpendicularX = -Math.sin(rad);
+        double perpendicularY = Math.cos(rad);
+
+        double forwardX = Math.cos(rad);
+        double forwardY = Math.sin(rad);
+
+        for (double[] offset : offsets) {
+            double x = position.x
+                    + perpendicularX * offset[0]
+                    + forwardX * offset[1];
+
+            double y = position.y
+                    + perpendicularY * offset[0]
+                    + forwardY * offset[1];
+
+            projectiles.add(new Projectile(
+                    "/projectile.png",
+                    x, y,
+                    deg,
+                    500, 1, 10, 10
+            ));
+        }
+        return projectiles;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+        if (points - lastHealthMilestone > 250000) {
+            if (health < maxHealth) health++;
+            lastHealthMilestone += 250000;
+        }
+        if (points - lastProjectileMilestone > 100000) {
+            if (projectileCount < 4) {
+                projectileCount++;
+            }
+            lastProjectileMilestone += 100000;
+        }
     }
 
     @Override
