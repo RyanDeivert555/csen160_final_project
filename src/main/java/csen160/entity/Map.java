@@ -2,8 +2,8 @@ package csen160.entity;
 
 import csen160.core.*;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.Graphics2D;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -393,6 +393,10 @@ public class Map {
             }
         }
         return cy + dy;
+    }
+
+    public Dimension getMapSize() {
+        return new Dimension(cols * TileSet.TILE_SIZE, rows * TileSet.TILE_SIZE);
     }
 
     public void render(Graphics2D g) {
