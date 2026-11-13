@@ -43,6 +43,7 @@ public class GameContext {
         renderer.addMouseMotionListener(input);
 
         camera = new Camera(new Point2D.Double(), 1.0, renderer.getWidth(), renderer.getHeight());
+        player.attachMap(map);
     }
 
     public GameContext() {
@@ -90,7 +91,6 @@ public class GameContext {
 
         final var dt = getDeltaTime();
 
-        // move player
         if (input.isKeyDown(KeyEvent.VK_W)) {
             player.move(0, -1, dt);
         }

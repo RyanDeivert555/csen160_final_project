@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 
 class TileSet {
@@ -142,6 +143,18 @@ class TileSet {
     private static final int[] SRC_Y = new int[SHEET_COLUMNS * SHEET_ROWS + 1];
     public static final BufferedImage SPRITESHEET;
 
+    private static final boolean[] OBJECT_BLOCKS = new boolean[SHEET_COLUMNS * SHEET_ROWS + 1];
+
+    private static void markBlocking(int from, int to) {
+        for (int t = from; t <= to; t++) {
+            OBJECT_BLOCKS[t] = true;
+        }
+    }
+
+    public static boolean objectBlocks(int tile) {
+        return tile != 0 && OBJECT_BLOCKS[tile];
+    }
+
     static {
         for (int tile = 1; tile <= SHEET_COLUMNS * SHEET_ROWS; tile++) {
             final var index = tile - 1;
@@ -157,10 +170,27 @@ class TileSet {
         }
 
         SPRITESHEET = AssetLoader.loadTexture(SHEET_PATH);
+
+        OBJECT_BLOCKS[TILE_ROCK_SMALL] = true;
+        OBJECT_BLOCKS[TILE_ROCK_LARGE] = true;
+        OBJECT_BLOCKS[TILE_ROCK_MEDIUM] = true;
+        OBJECT_BLOCKS[TILE_ROCK_MOSS_SMALL] = true;
+        OBJECT_BLOCKS[TILE_ROCK_MOSS_LARGE] = true;
+        OBJECT_BLOCKS[TILE_ROCK_MOSS_MEDIUM] = true;
+        markBlocking(13, 16);
+        markBlocking(29, 32);
+        markBlocking(45, 48);
+        markBlocking(61, 64);
+        markBlocking(77, 80);
+        markBlocking(89, 96);
     }
 
     public static Region region(int tile) {
         return REGIONS.get(tile);
+    }
+
+    public static boolean groundBlocks(int tile) {
+        return tile != TILE_WATER;
     }
 
     public static void draw(Graphics2D g, BufferedImage sheet, int tile, int dx, int dy) {
@@ -178,59 +208,194 @@ record Tile(double x, double y, TileSet.Region region, int code) {
 }
 
 public class Map {
-    private final ArrayList<Tile> tiles;
+    private static final double TS = TileSet.TILE_SIZE;
+    private static final double EPS = 1e-6;
+
+    private final ArrayList<Tile> tiles = new ArrayList<>();
+    private boolean[][] solid = new boolean[0][0];
+    private int rows = 0;
+    private int cols = 0;
 
     public Map(ArrayList<Tile> tiles) {
-        this.tiles = tiles;
+        for (final var tile : tiles) {
+            add(tile, false);
+        }
     }
 
     public static Map fromFile(String path) {
-        final var tiles = new ArrayList<Tile>();
+        final var map = new Map(new ArrayList<>());
+        map.load(path, false);
+
+        return map;
+    }
+
+    public Map addLayer(String path) {
+        load(path, true);
+
+        return this;
+    }
+
+    private void load(String path, boolean objectLayer) {
         final var stream = AssetLoader.getResourceStream(path);
 
-        double x = 0.0;
-        double y = 0.0;
+        int row = 0;
         try (final var reader = new BufferedReader(new InputStreamReader(stream))) {
             String line = null;
             while ((line = reader.readLine()) != null) {
-                final var tile_codes = line.split("\\s+");
-
-                for (final var tile_code : tile_codes) {
-                    if (!tile_code.isEmpty()) {
-                        final var code = Integer.parseInt(tile_code);
-                        // sentinel tile
-                        if (code != 0) {
-                            final var region = TileSet.region(code);
-                            final var tile = new Tile(x, y, region, code);
-
-                            tiles.add(tile);
-                        }
-                        x += TileSet.TILE_SIZE;
+                int col = 0;
+                for (final var token : line.trim().split("\\s+")) {
+                    if (token.isEmpty()) {
+                        continue;
                     }
+                    final var code = Integer.parseInt(token);
+                    // 0 is the "empty" sentinel
+                    if (code != 0) {
+                        add(new Tile(col * TileSet.TILE_SIZE, row * TileSet.TILE_SIZE, TileSet.region(code), code),
+                                objectLayer);
+                    }
+                    col++;
                 }
-
-                x = 0.0;
-                y += TileSet.TILE_SIZE;
+                row++;
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to load \"" + path + "\"", e);
         } catch (NumberFormatException e) {
             throw new RuntimeException("Illegal tile charater", e);
         }
-
-        return new Map(tiles);
     }
 
-    public Map addLayer(String path) {
-        final var newMap = Map.fromFile(path);
+    private void add(Tile tile, boolean objectLayer) {
+        tiles.add(tile);
 
-        tiles.addAll(newMap.tiles);
+        final var row = (int) (tile.y() / TileSet.TILE_SIZE);
+        final var col = (int) (tile.x() / TileSet.TILE_SIZE);
+        // size the grid from every tile (water included) so open water inside the map
+        // is not "outside"
+        grow(row + 1, col + 1);
 
-        return this;
+        final var blocks = objectLayer ? TileSet.objectBlocks(tile.code()) : TileSet.groundBlocks(tile.code());
+        if (blocks) {
+            solid[row][col] = true;
+        }
+    }
+
+    private void grow(int minRows, int minCols) {
+        if (minRows <= rows && minCols <= cols) {
+            return;
+        }
+        final var newRows = Math.max(rows, minRows);
+        final var newCols = Math.max(cols, minCols);
+        final var grown = new boolean[newRows][newCols];
+        for (int r = 0; r < rows; r++) {
+            System.arraycopy(solid[r], 0, grown[r], 0, cols);
+        }
+        solid = grown;
+        rows = newRows;
+        cols = newCols;
+    }
+
+    private boolean isSolid(int row, int col) {
+        return row < 0 || col < 0 || row >= rows || col >= cols || solid[row][col];
+    }
+
+    private static int lo(double v) {
+        return (int) Math.floor((v + EPS) / TS);
+    }
+
+    private static int hi(double v) {
+        return (int) Math.ceil((v - EPS) / TS) - 1;
+    }
+
+    private boolean columnSolid(int col, int row0, int row1) {
+        for (int r = row0; r <= row1; r++) {
+            if (isSolid(r, col)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean rowSolid(int row, int col0, int col1) {
+        for (int c = col0; c <= col1; c++) {
+            if (isSolid(row, c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isBlocked(double cx, double cy, double w, double h) {
+        final var c0 = lo(cx - w / 2);
+        final var c1 = hi(cx + w / 2);
+        final var r0 = lo(cy - h / 2);
+        final var r1 = hi(cy + h / 2);
+        for (int r = r0; r <= r1; r++) {
+            for (int c = c0; c <= c1; c++) {
+                if (isSolid(r, c)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public double moveX(double cx, double cy, double w, double h, double dx) {
+        if (dx == 0.0) {
+            return cx;
+        }
+        final var hw = w / 2;
+        final var r0 = lo(cy - h / 2);
+        final var r1 = hi(cy + h / 2);
+
+        if (dx > 0) {
+            final var edge = cx + hw;
+            final var last = hi(edge + dx);
+            for (int c = lo(edge); c <= last; c++) {
+                if (columnSolid(c, r0, r1)) {
+                    return c * TS - hw;
+                }
+            }
+        } else {
+            final var edge = cx - hw;
+            final var last = lo(edge + dx);
+            for (int c = hi(edge); c >= last; c--) {
+                if (columnSolid(c, r0, r1)) {
+                    return (c + 1) * TS + hw;
+                }
+            }
+        }
+        return cx + dx;
+    }
+
+    public double moveY(double cx, double cy, double w, double h, double dy) {
+        if (dy == 0.0) {
+            return cy;
+        }
+        final var hh = h / 2;
+        final var c0 = lo(cx - w / 2);
+        final var c1 = hi(cx + w / 2);
+
+        if (dy > 0) {
+            final var edge = cy + hh;
+            final var last = hi(edge + dy);
+            for (int r = lo(edge); r <= last; r++) {
+                if (rowSolid(r, c0, c1)) {
+                    return r * TS - hh;
+                }
+            }
+        } else {
+            final var edge = cy - hh;
+            final var last = lo(edge + dy);
+            for (int r = hi(edge); r >= last; r--) {
+                if (rowSolid(r, c0, c1)) {
+                    return (r + 1) * TS + hh;
+                }
+            }
+        }
+        return cy + dy;
     }
 
     public void render(Graphics2D g) {
-        // render underneath with ocean first
         for (final var tile : tiles) {
             final var x = tile.x();
             final var y = tile.y();

@@ -60,7 +60,6 @@ public abstract class Entity {
     }
 
     public Projectile shootProjectile(double deg) {
-        final var bounds = getBbox();
         return new Projectile(this.position.x, this.position.y, deg);
     }
 
