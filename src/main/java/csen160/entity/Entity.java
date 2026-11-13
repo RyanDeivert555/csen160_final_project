@@ -3,17 +3,36 @@ package csen160.entity;
 import csen160.core.*;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import javax.sound.sampled.Clip;
 
 public abstract class Entity {
     double xPos;
     double yPos;
-    
+
     int width;
     int height;
 
     BufferedImage img;
+
+    static final List<Clip> HIT_SOUNDS;
+    static {
+        final var sounds = new ArrayList<Clip>();
+        for (int i = 0; i <= 4; i++) {
+            final var path0 = String.format("/impactWood_light_%03d.wav", i);
+            final var path1 = String.format("/impactWood_medium_%03d.wav", i);
+            final var path2 = String.format("/impactWood_heavy_%03d.wav", i);
+
+            sounds.add(AssetLoader.loadSound(path0));
+            sounds.add(AssetLoader.loadSound(path1));
+            sounds.add(AssetLoader.loadSound(path2));
+        }
+
+        HIT_SOUNDS = sounds;
+    }
 
     public double rotation;
 
@@ -61,11 +80,19 @@ public abstract class Entity {
     }
 
     public Projectile shootProjectile(double deg) {
-        final var bounds = getBbox();
         return new Projectile(this.xPos, this.yPos, deg);
     }
 
     public boolean takeDamage() {
+        final var idx = ThreadLocalRandom.current().nextInt(HIT_SOUNDS.size());
+        final var clip = HIT_SOUNDS.get(idx);
+
+        if (clip.isRunning()) {
+            clip.stop();
+        }
+        clip.setFramePosition(0);
+        clip.start();
+
         this.health--;
         return this.health <= 0;
     }

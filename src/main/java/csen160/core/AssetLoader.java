@@ -54,7 +54,6 @@ public class AssetLoader {
         }
 
         try (
-                // TODO: does this need to be a BufferedInputStream?
                 final var stream = new BufferedInputStream(getResourceStream(path));
                 final var audio = AudioSystem.getAudioInputStream(stream);) {
             final var clip = AudioSystem.getClip();

@@ -10,6 +10,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Iterator;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
 
 public class GameContext {
     // engine variables
@@ -51,10 +53,17 @@ public class GameContext {
         player.attachMap(map);
         Enemy.setMap(map);
 
+        final var music = AssetLoader.loadSound("/music.wav");
+        final var control = (FloatControl) music.getControl(FloatControl.Type.MASTER_GAIN);
+        control.setValue(-12.0f);
+        music.setFramePosition(0);
+        music.loop(Clip.LOOP_CONTINUOUSLY);
+
         // initial enemy set
         for (int i = 0; i < 45; i++) {
             Enemy e = spawner.spawnEnemy();
-            if (e != null) enemies.add(e);
+            if (e != null)
+                enemies.add(e);
         }
     }
 
@@ -119,11 +128,12 @@ public class GameContext {
 
         // update player
         player.update(dt);
-//        System.out.println("Player: " + player.getX() + ", " + player.getY());
+        // System.out.println("Player: " + player.getX() + ", " + player.getY());
         // spawn new enemies
         if (enemies.size() < maxEnemyCount && spawningEnabled) {
             var newEnemies = spawner.spawnEnemies(dt);
-            if (newEnemies != null) enemies.addAll(newEnemies);
+            if (newEnemies != null)
+                enemies.addAll(newEnemies);
         }
 
         // update enemies
@@ -132,7 +142,8 @@ public class GameContext {
         for (Enemy e : enemies) {
             e.update(dt, snapshotX, snapshotY);
 
-            if (e.getDistance(player) > e.getRange()) continue; // don't shoot if player is too far away
+            if (e.getDistance(player) > e.getRange())
+                continue; // don't shoot if player is too far away
             var projectiles = e.shootProjectiles(e.angleTowards(player));
             if (projectiles != null) {
                 enemyProjectiles.addAll(projectiles);
@@ -218,13 +229,15 @@ public class GameContext {
                     }
                 }
             }
-            if (expired || hit) it.remove();
+            if (expired || hit)
+                it.remove();
         }
 
         // left click down -> create new player projectile
         if (input.isMouseDown(MouseEvent.BUTTON1)) {
             var ps = player.shootProjectiles(player.rotation);
-            if (ps != null) playerProjectiles.addAll(ps);
+            if (ps != null)
+                playerProjectiles.addAll(ps);
         }
 
         // set up boss fight
@@ -258,7 +271,8 @@ public class GameContext {
             // boss attacks
             theBoss.update(dt);
             var ps = theBoss.shootProjectiles(theBoss.angleTowards(player));
-            if (ps != null) enemyProjectiles.addAll(ps);
+            if (ps != null)
+                enemyProjectiles.addAll(ps);
         }
     }
 
