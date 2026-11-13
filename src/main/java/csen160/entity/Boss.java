@@ -90,8 +90,7 @@ public class Boss extends Entity {
     }
 
     public HashSet<Projectile> shootProjectiles(double deg) {
-        if (!canFire) return new HashSet<>();
-        ;
+        if (!canFire) return new HashSet<>();;
         canFire = false;
         fireTimer = 0;
 

@@ -29,8 +29,8 @@ public class Player extends Entity {
         this.maxHealth = 10;
         this.health = 10;
 
-        xPos = 64;
-        yPos = 64;
+        xPos = 256;
+        yPos = 256;
     }
 
     public void attachMap(Map map) {
