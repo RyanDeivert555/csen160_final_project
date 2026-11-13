@@ -74,7 +74,7 @@ public class Player extends Entity {
         this.canFire = false;
         this.fireTimer = 0;
 
-        return new Projectile("/projectile.png", xPos, yPos, deg, 500, 1, 10, 10);
+        return new Projectile("/projectile.png", xPos, yPos, deg, 500, 7, 10, 10);
     }
 
     public HashSet<Projectile> shootProjectiles(double deg) {
@@ -120,7 +120,7 @@ public class Player extends Entity {
                     "/projectile.png",
                     x, y,
                     deg,
-                    500, 1, 10, 10));
+                    500, 7, 10, 10));
         }
         return projectiles;
     }

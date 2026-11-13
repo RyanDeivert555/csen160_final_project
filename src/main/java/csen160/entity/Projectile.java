@@ -8,7 +8,7 @@ public class Projectile extends Entity {
     double lifetime;
     double direction; // degrees
 
-    double timeSinceCreation;
+    double timeSinceCreation = 0;
 
     public Projectile() {
         super("/projectile.png");
