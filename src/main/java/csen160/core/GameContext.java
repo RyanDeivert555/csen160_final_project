@@ -30,15 +30,21 @@ public class GameContext {
     private HashSet<Enemy> enemies = new HashSet<>();
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
     private HashSet<Projectile> enemyProjectiles = new HashSet<>();
+    private HashSet<VisualEffect> effects = new HashSet<>();
     private Map map = Map.fromFile("/test_map.txt").addLayer("/test_layer.txt");
 
     // game variables
-    private final SpawnManager spawner = new SpawnManager(0, 2500, 0, 1500); // TODO: properly establish size
+    int mapSizeX = map.getMapSize().width;
+    int mapSizeY = map.getMapSize().height;
+
+    private final SpawnManager spawner = new SpawnManager(0, mapSizeX, 0, mapSizeY);
     boolean spawningEnabled = true;
-    boolean triggerPlayerDefeat = false;
-    boolean bossFightActive = false;
+
     private int maxEnemyCount = 100;
     private int points = 0;
+
+    boolean triggerPlayerDefeat = false;
+    boolean bossFightActive = false;
     private Boss theBoss;
 
     public GameContext(double fps) {
@@ -158,7 +164,21 @@ public class GameContext {
         camera.setViewSize(renderer.getWidth(), renderer.getHeight());
 
         if (!bossFightActive) {
-            camera.setPosition(centerX, centerY);
+            Rectangle2D.Double bounds = camera.getVisibleBounds();
+
+            double halfWidth = bounds.width / 2.0;
+            double halfHeight = bounds.height / 2.0;
+
+            double x = Math.clamp(centerX, halfWidth, mapSizeX - halfWidth);
+
+            double y = Math.clamp(centerY, halfHeight, mapSizeY - halfHeight);
+
+            if (bounds.width >= 2500)
+                x = mapSizeX / 2.0;
+            if (bounds.height >= 1250)
+                y = mapSizeY / 2.0;
+
+            camera.setPosition(x, y);
         }
 
         final var mouseWorld = camera.screenToWorld(input.getMouseX(), input.getMouseY());
@@ -189,6 +209,7 @@ public class GameContext {
                         maxEnemyCount = (points % 120000) * 10 + 100;
                         enemyIt.remove();
                     }
+                    effects.add(new VisualEffect("/PiratePack/PNG/Effects/explosion1.png", 25, 25, p.getX(), p.getY(), .4));
                     break;
                 }
             }
@@ -228,10 +249,14 @@ public class GameContext {
                         // game over
                     }
                 }
+                effects.add(new VisualEffect("/PiratePack/PNG/Effects/explosion3.png", 20, 20, p.getX(), p.getY(), .4));
             }
             if (expired || hit)
                 it.remove();
         }
+
+        // update effects -> remove if duration expired
+        effects.removeIf(e -> e.update(dt));
 
         // left click down -> create new player projectile
         if (input.isMouseDown(MouseEvent.BUTTON1)) {
@@ -299,14 +324,17 @@ public class GameContext {
             }
             if (theBoss != null)
                 r.drawImage(theBoss);
+            for (final var ve : effects) {
+                r.drawImage(ve);
+            }
 
             // ui drawing
             r.useScreenSpace();
 
-            r.drawString("SCORE: " + points, 0, 24);
+            r.drawString("SCORE: " + points, 4, 28);
 
             for (int i = 0; i < player.getHealth(); i++) {
-                r.drawImage(heart, 20 * i, 30, 30, 30);
+                r.drawImage(heart, 20 * i, 36, 30, 30);
             }
         }
     }
