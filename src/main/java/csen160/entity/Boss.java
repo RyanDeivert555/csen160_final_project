@@ -1,9 +1,15 @@
 package csen160.entity;
 
+import csen160.core.AssetLoader;
 import csen160.core.BBox;
 
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Boss extends Entity {
     double fireTimer;
@@ -17,11 +23,23 @@ public class Boss extends Entity {
 
     double attackRotation = 0;
 
-    public Boss() {
-        super("/boss.png", 200, 200, 50000, 0);
+    double squawkTimer = 0;
 
-        this.xPos = 1250;
-        this.yPos = 750;
+    static List<Clip> BOSS_SOUNDS;
+
+    static {
+        final var sounds = new ArrayList<Clip>();
+        sounds.add(AssetLoader.loadSound("/squawk1.wav"));
+        sounds.add(AssetLoader.loadSound("/squawk2.wav"));
+        sounds.add(AssetLoader.loadSound("/squawk3.wav"));
+        BOSS_SOUNDS = sounds;
+    }
+
+    public Boss() {
+        super("/boss.png", 150, 150, 50000, 0);
+
+        this.xPos = 3840;
+        this.yPos = 2304;
     }
 
     public void update(double dt) {
@@ -35,6 +53,28 @@ public class Boss extends Entity {
             currentAttack = (currentAttack + 1) % attackLengths.length;
             currentAttackTimer = 0;
             attackRotation = 0;
+        }
+
+        squawkTimer += dt;
+        if (squawkTimer >= Math.random() * 3 + 5) {
+            squawkTimer = 0;
+            final var idx = ThreadLocalRandom.current().nextInt(BOSS_SOUNDS.size());
+            final var clip = BOSS_SOUNDS.get(idx);
+
+            if (clip.isRunning()) {
+                clip.stop();
+            }
+
+            // increase volume
+            if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                final var volume = (FloatControl) clip.getControl(
+                        FloatControl.Type.MASTER_GAIN
+                );
+
+                volume.setValue(Math.min(6.0f, volume.getMaximum()));
+            }
+            clip.setFramePosition(0);
+            clip.start();
         }
     }
 
@@ -50,7 +90,8 @@ public class Boss extends Entity {
     }
 
     public HashSet<Projectile> shootProjectiles(double deg) {
-        if (!canFire) return new HashSet<>();;
+        if (!canFire) return new HashSet<>();
+        ;
         canFire = false;
         fireTimer = 0;
 

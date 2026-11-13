@@ -44,7 +44,7 @@ public class SpawnManager {
         // STANDARD COMBAT ENEMIES
         enemyTypes.put("FIGHTER", new Enemy(
                 "/PiratePack/PNG/Ships/ship (5).png",
-                48, 64, 6, 110, "ARC", .1, 150, false));
+                48, 64, 6, 110, "ARC", .25, 150, false));
 
         enemyTypes.put("GUNNER", new Enemy(
                 "/PiratePack/PNG/Ships/ship (6).png",
@@ -57,7 +57,7 @@ public class SpawnManager {
         // ADVANCED ENEMIES
         enemyTypes.put("SNIPER", new Enemy(
                 "/PiratePack/PNG/Ships/ship (8).png",
-                44, 60, 8, 75, "DEFAULT", .25, 300, true));
+                44, 60, 8, 75, "DEFAULT", 1, 300, true));
 
         enemyTypes.put("GATLING", new Enemy(
                 "/PiratePack/PNG/Ships/ship (8).png",
@@ -79,11 +79,11 @@ public class SpawnManager {
         // ELITE ENEMIES
         enemyTypes.put("ELITE", new Enemy(
                 "/PiratePack/PNG/Ships/ship (12).png",
-                72, 88, 40, 100, "CIRCLE", 1, 140, true));
+                72, 88, 40, 100, "CIRCLE", 1.4, 140, true));
 
         enemyTypes.put("ELITE_GUNNER", new Enemy(
                 "/PiratePack/PNG/Ships/ship (13).png",
-                80, 96, 50, 65, "WALL", .3, 150, false));
+                80, 96, 50, 65, "WALL", .4, 150, false));
 
         keys = new ArrayList<>(enemyTypes.keySet());
     }

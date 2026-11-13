@@ -42,7 +42,7 @@ public abstract class Entity {
      */
     BufferedImage img;
 
-    static final List<Clip> HIT_SOUNDS;
+    static List<Clip> HIT_SOUNDS;
     static {
         final var sounds = new ArrayList<Clip>();
         for (int i = 0; i <= 4; i++) {
@@ -194,11 +194,11 @@ public abstract class Entity {
     }
 
     public int getWidth() {
-        return (int) this.width;
+        return this.width;
     }
 
     public int getHeight() {
-        return (int) this.height;
+        return this.height;
     }
 
     public int getMaxHealth() {

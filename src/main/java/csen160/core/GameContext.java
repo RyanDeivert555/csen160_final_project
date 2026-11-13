@@ -31,7 +31,7 @@ public class GameContext {
     private HashSet<Projectile> playerProjectiles = new HashSet<>();
     private HashSet<Projectile> enemyProjectiles = new HashSet<>();
     private HashSet<VisualEffect> effects = new HashSet<>();
-    private Map map = Map.fromFile("/test_map.txt").addLayer("/test_layer.txt");
+    private Map map = Map.fromFile("/ocean_map_large_ground.txt").addLayer("/ocean_map_large_objects.txt");
 
     // game variables
     int mapSizeX = map.getMapSize().width;
@@ -40,7 +40,7 @@ public class GameContext {
     private final SpawnManager spawner = new SpawnManager(0, mapSizeX, 0, mapSizeY);
     boolean spawningEnabled = true;
 
-    private int maxEnemyCount = 100;
+    private int maxEnemyCount = 240;
     private int points = 0;
 
     boolean triggerPlayerDefeat = false;
@@ -66,7 +66,7 @@ public class GameContext {
         music.loop(Clip.LOOP_CONTINUOUSLY);
 
         // initial enemy set
-        for (int i = 0; i < 45; i++) {
+        for (int i = 0; i < 80; i++) {
             Enemy e = spawner.spawnEnemy();
             if (e != null)
                 enemies.add(e);
@@ -181,10 +181,10 @@ public class GameContext {
             camera.setPosition(x, y);
         }
 
+        // rotate player towards mouse
         final var mouseWorld = camera.screenToWorld(input.getMouseX(), input.getMouseY());
         final var dx = mouseWorld.x - centerX;
         final var dy = mouseWorld.y - centerY;
-
         player.rotation = Math.toDegrees(Math.atan2(dy, dx));
 
         // move all player projectiles, destroy if lifetime elapsed
@@ -206,7 +206,7 @@ public class GameContext {
                         // enemy defeated
                         points = (int) (points + 100 * Math.pow(e.getMaxHealth(), 1.2));
                         player.setPoints(points);
-                        maxEnemyCount = (points % 120000) * 10 + 100;
+                        maxEnemyCount = (points % 120000) * 15 + 240;
                         enemyIt.remove();
                     }
                     effects.add(new VisualEffect("/PiratePack/PNG/Effects/explosion1.png", 25, 25, p.getX(), p.getY(), .4));
@@ -246,7 +246,7 @@ public class GameContext {
                         spawningEnabled = false;
                         triggerPlayerDefeat = true;
                     } else {
-                        // game over
+                        // TODO: GAME OVER
                     }
                 }
                 effects.add(new VisualEffect("/PiratePack/PNG/Effects/explosion3.png", 20, 20, p.getX(), p.getY(), .4));
@@ -271,29 +271,33 @@ public class GameContext {
             enemyProjectiles.clear();
             playerProjectiles.clear();
             enemies.clear();
-            camera.setPosition(1250, 1050);
             theBoss = new Boss();
+            camera.setPosition(theBoss.getX(), theBoss.getY());
+            player.teleport(theBoss.getX(), theBoss.getY() + 200);
             bossFightActive = true;
         }
 
         if (bossFightActive) {
             // keep player in boss arena
             Rectangle2D.Double bounds = camera.getVisibleBounds();
+
             double cx = player.getX();
             double cy = player.getY();
-            if (cx < bounds.x || cx > bounds.x + bounds.width || cy - 250 < bounds.y || cy > bounds.y + bounds.height) {
-                double pdx = theBoss.getX() - player.getX();
-                double pdy = theBoss.getY() + 500 - player.getY();
 
-                double magnitude = Math.sqrt(pdx * pdx + pdy * pdy);
+            double marginX = player.getWidth() / 2.0;
+            double marginY = player.getHeight() / 2.0;
 
-                pdx /= magnitude;
-                pdy /= magnitude;
+            double minX = bounds.x + marginX;
+            double maxX = bounds.x + bounds.width - marginX;
 
-                player.move(pdx, pdy, dt * 2);
-            }
+            double minY = bounds.y + marginY;
+            double maxY = bounds.y + bounds.height - marginY;
 
-            // boss attacks
+            cx = Math.clamp(cx, minX, maxX);
+            cy = Math.clamp(cy, minY, maxY);
+
+            player.teleport((int) cx, (int) cy);
+
             theBoss.update(dt);
             var ps = theBoss.shootProjectiles(theBoss.angleTowards(player));
             if (ps != null)

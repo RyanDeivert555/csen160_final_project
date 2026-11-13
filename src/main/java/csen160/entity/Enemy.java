@@ -194,12 +194,12 @@ public class Enemy extends Entity {
     @Override
     public Projectile shootProjectile(double deg) {
         return new Projectile("/evilProjectile.png", xPos, yPos,
-                deg, projectileSpeed, 5, 10, 10);
+                deg, projectileSpeed, 7, 10, 10);
     }
 
     public Projectile shootProjectile(double deg, double x, double y) {
         return new Projectile("/evilProjectile.png", x, y,
-                deg, projectileSpeed, 5, 10, 10);
+                deg, projectileSpeed, 7, 10, 10);
     }
 
     public HashSet<Projectile> shootProjectiles(double deg) {
