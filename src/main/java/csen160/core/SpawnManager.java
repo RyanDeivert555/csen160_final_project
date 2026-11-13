@@ -98,13 +98,15 @@ public class SpawnManager {
 
     public Enemy spawnEnemy() {
         String randomKey = keys.get(random.nextInt(keys.size()));
-        var e = new Enemy(enemyTypes.get(randomKey));
-
-        double x = random.nextDouble(minX, maxX);
-        double y = random.nextDouble(minY, maxY);
-
-        e.teleport((int) x, (int) y);
-
+        Enemy e = new Enemy(enemyTypes.get(randomKey));
+        int attempts = 1;
+        do {
+            double x = random.nextDouble(minX, maxX);
+            double y = random.nextDouble(minY, maxY);
+            e.teleport((int) x, (int) y);
+            attempts++;
+        } while (e.isBlocked() && attempts < 100);
+        if (e.isBlocked()) return null;
         return e;
     }
 

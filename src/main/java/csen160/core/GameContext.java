@@ -48,6 +48,8 @@ public class GameContext {
         renderer.addMouseMotionListener(input);
 
         camera = new Camera(new Point2D.Double(), .75, renderer.getWidth(), renderer.getHeight());
+        player.attachMap(map);
+        Enemy.setMap(map);
 
         // initial enemy set
         for (int i = 0; i < 45; i++) {
@@ -208,9 +210,12 @@ public class GameContext {
                 hit = true;
                 if (player.takeDamage()) {
                     // start boss fight
-                    spawningEnabled = false;
-                    triggerPlayerDefeat = true;
-                    System.out.println("Player defeated!");
+                    if (!bossFightActive) {
+                        spawningEnabled = false;
+                        triggerPlayerDefeat = true;
+                    } else {
+                        // game over
+                    }
                 }
             }
             if (expired || hit) it.remove();
@@ -234,6 +239,7 @@ public class GameContext {
         }
 
         if (bossFightActive) {
+            // keep player in boss arena
             Rectangle2D.Double bounds = camera.getVisibleBounds();
             double cx = player.getX();
             double cy = player.getY();
@@ -248,6 +254,11 @@ public class GameContext {
 
                 player.move(pdx, pdy, dt * 2);
             }
+
+            // boss attacks
+            theBoss.update(dt);
+            var ps = theBoss.shootProjectiles(theBoss.angleTowards(player));
+            if (ps != null) enemyProjectiles.addAll(ps);
         }
     }
 
