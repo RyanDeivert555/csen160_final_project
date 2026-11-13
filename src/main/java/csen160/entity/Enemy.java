@@ -15,7 +15,19 @@ public class Enemy extends Entity {
     boolean randomAim;
     double projectileSpeed = 150.0;
 
-    double range = 500.0;
+    double range = 400.0;
+    private double targetX;
+    private double targetY;
+    private double movementTimer;
+
+    private enum MovementBehavior {
+        WANDER,
+        APPROACH,
+        RETREAT,
+        STRAFE
+    }
+
+    private double strafeDirection = 1.0;
 
     public Enemy() {
         super("/temp.png");
@@ -38,14 +50,108 @@ public class Enemy extends Entity {
         this.projectileSpeed = other.projectileSpeed;
     }
 
-    public void update(double dt) {
-        if (!this.canFire && this.fireTimer >= 1.0 / this.fireRate) {
-            this.canFire = true;
+    public void update(double dt, double playerX, double playerY) {
+        // Firing timer
+        if (!canFire && fireTimer >= 1.0 / fireRate) {
+            canFire = true;
         } else {
-            this.fireTimer += dt;
+            fireTimer += dt;
         }
 
-        // todo: enemy movement handled here
+        double distanceToPlayer = Point2D.distance(
+                position.x, position.y,
+                playerX, playerY
+        );
+
+        boolean playerNearby = distanceToPlayer <= range;
+
+        // Choose new waypoint periodically
+        movementTimer -= dt;
+
+        double distanceToTarget = Point2D.distance(
+                position.x, position.y,
+                targetX, targetY
+        );
+
+        if (movementTimer <= 0 || distanceToTarget < 10) {
+            chooseWaypoint(playerX, playerY, playerNearby);
+            double movementInterval = 2.0;
+            movementTimer = movementInterval + Math.random() * 2.0;
+        }
+
+        // Move toward waypoint
+        double dx = targetX - position.x;
+        double dy = targetY - position.y;
+
+        double length = Math.hypot(dx, dy);
+
+        if (length > 0) {
+            double moveX = dx / length;
+            double moveY = dy / length;
+
+            double movementSpeed = 100.0;
+            position.x += moveX * movementSpeed * dt;
+            position.y += moveY * movementSpeed * dt;
+
+            // Face movement direction
+            rotation = Math.toDegrees(Math.atan2(moveY, moveX)) + 270;
+        }
+    }
+
+    private void chooseWaypoint(double playerX, double playerY, boolean playerNearby) {
+        double angle;
+        double distance;
+
+        MovementBehavior behavior = MovementBehavior.WANDER;
+        if (playerNearby) {
+            double roll = Math.random();
+
+            if (roll < 0.4) {
+                behavior = MovementBehavior.STRAFE;
+            } else if (roll < 0.65) {
+                behavior = MovementBehavior.APPROACH;
+            } else if (roll < 0.85) {
+                behavior = MovementBehavior.RETREAT;
+            }
+
+            if (Math.random() < 0.5) {
+                strafeDirection *= -1;
+            }
+        }
+
+        angle = Math.random() * Math.PI * 2;
+        distance = 75 + Math.random() * 150;
+
+        switch (behavior) {
+            case APPROACH:
+                targetX = position.x + (playerX - position.x) * 0.4;
+                targetY = position.y + (playerY - position.y) * 0.4;
+                break;
+
+            case RETREAT:
+                double dx = position.x - playerX;
+                double dy = position.y - playerY;
+                double length = Math.max(1, Math.hypot(dx, dy));
+
+                targetX = position.x + dx / length * distance;
+                targetY = position.y + dy / length * distance;
+                break;
+
+            case STRAFE:
+                double px = playerX - position.x;
+                double py = playerY - position.y;
+                double len = Math.max(1, Math.hypot(px, py));
+
+                targetX = position.x - py / len * distance * strafeDirection;
+                targetY = position.y + px / len * distance * strafeDirection;
+                break;
+
+            case WANDER:
+            default:
+                targetX = position.x + Math.cos(angle) * distance;
+                targetY = position.y + Math.sin(angle) * distance;
+                break;
+        }
     }
 
     @Override
@@ -60,6 +166,7 @@ public class Enemy extends Entity {
     }
 
     public HashSet<Projectile> shootProjectiles(double deg) {
+
         if (!canFire) return null;
         canFire = false;
         fireTimer = 0;
