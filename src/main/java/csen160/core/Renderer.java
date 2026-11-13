@@ -2,6 +2,7 @@ package csen160.core;
 
 import csen160.entity.Entity;
 import csen160.entity.Map;
+import csen160.entity.VisualEffect;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -60,6 +61,10 @@ public class Renderer extends Canvas {
 
         public void drawMap(Map m) {
             m.render(graphics);
+        }
+
+        public void drawImage(VisualEffect ve) {
+            ve.render(graphics);
         }
 
         public void drawString(String t, int x, int y) {
