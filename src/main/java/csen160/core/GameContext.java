@@ -54,6 +54,7 @@ public class GameContext {
         renderer.addKeyListener(input);
         renderer.addMouseListener(input);
         renderer.addMouseMotionListener(input);
+        renderer.setFocusable(true);
 
         camera = new Camera(new Point2D.Double(), .75, renderer.getWidth(), renderer.getHeight());
         player.attachMap(map);
@@ -86,7 +87,7 @@ public class GameContext {
     }
 
     public void run() {
-        renderer.requestFocus();
+        renderer.requestFocusInWindow();
         long lastTime = System.nanoTime();
         double accum = 0.0;
         final double nsPerTick = 1_000_000_000.0 / fps;
