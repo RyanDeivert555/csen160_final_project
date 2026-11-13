@@ -90,17 +90,17 @@ public class Player extends Entity {
         var projectiles = new HashSet<Projectile>();
 
         double[][] offsets = switch (projectileCount) {
-            case 2 -> new double[][]{{-5, 0}, {5, 0}};
-            case 3 -> new double[][]{{0, 8}, // Front
-                    {-6, -6}, // Back left
-                    {6, -6} // Back right
+            case 2 -> new double[][] { { -5, 0 }, { 5, 0 } };
+            case 3 -> new double[][] { { 0, 8 }, // Front
+                    { -6, -6 }, // Back left
+                    { 6, -6 } // Back right
             };
-            case 4 -> new double[][]{{-5, 5}, // Front left
-                    {5, 5}, // Front right
-                    {-10, -5}, // Back left
-                    {10, -5} // Back right
+            case 4 -> new double[][] { { -5, 5 }, // Front left
+                    { 5, 5 }, // Front right
+                    { -10, -5 }, // Back left
+                    { 10, -5 } // Back right
             };
-            default -> new double[][]{{0, 0}};
+            default -> new double[][] { { 0, 0 } };
         };
 
         double rad = Math.toRadians(deg);
@@ -148,7 +148,6 @@ public class Player extends Entity {
      * To be called at the start of the boss fight ONLY
      */
     public void setHealth(int health) {
-        this.maxHealth = health;
         this.health = health;
     }
 

@@ -129,6 +129,7 @@ public class GameContext {
         if (state == GameState.MENU) {
             if (input.isKeyDown(KeyEvent.VK_SPACE)) {
                 state = GameState.GAME;
+                points = 0;
                 return;
             }
         }
@@ -336,6 +337,7 @@ public class GameContext {
             if (state == GameState.MENU) {
                 r.drawMap(map);
                 r.setColor(Color.BLACK);
+                r.drawString(String.format("Previous game score: %d\n", points), 200, 100);
                 r.drawString("PRESS SPACE TO START!", 200, 200);
                 return;
             }
