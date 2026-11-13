@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,8 +32,12 @@ public class GameContext {
 
     // game variables
     private final SpawnManager spawner = new SpawnManager(0, 2500, 0, 1500); // TODO: properly establish size
+    boolean spawningEnabled = true;
+    boolean triggerPlayerDefeat = false;
+    boolean bossFightActive = false;
     private int maxEnemyCount = 100;
     private int points = 0;
+    private Boss theBoss;
 
     public GameContext(double fps) {
         running = true;
@@ -42,10 +47,13 @@ public class GameContext {
         renderer.addMouseListener(input);
         renderer.addMouseMotionListener(input);
 
-        camera = new Camera(new Point2D.Double(), 1.0, renderer.getWidth(), renderer.getHeight());
-        // attach maps
-        player.attachMap(map);
-        Enemy.setMap(map);
+        camera = new Camera(new Point2D.Double(), .75, renderer.getWidth(), renderer.getHeight());
+
+        // initial enemy set
+        for (int i = 0; i < 45; i++) {
+            Enemy e = spawner.spawnEnemy();
+            if (e != null) enemies.add(e);
+        }
     }
 
     public GameContext() {
@@ -93,6 +101,7 @@ public class GameContext {
 
         final var dt = getDeltaTime();
 
+        // move player
         if (input.isKeyDown(KeyEvent.VK_W)) {
             player.move(0, -1, dt);
         }
@@ -108,12 +117,11 @@ public class GameContext {
 
         // update player
         player.update(dt);
-        // System.out.println("Player: " + player.getX() + ", " + player.getY());
+//        System.out.println("Player: " + player.getX() + ", " + player.getY());
         // spawn new enemies
-        if (enemies.size() < maxEnemyCount) {
+        if (enemies.size() < maxEnemyCount && spawningEnabled) {
             var newEnemies = spawner.spawnEnemies(dt);
-            if (newEnemies != null)
-                enemies.addAll(newEnemies);
+            if (newEnemies != null) enemies.addAll(newEnemies);
         }
 
         // update enemies
@@ -122,8 +130,7 @@ public class GameContext {
         for (Enemy e : enemies) {
             e.update(dt, snapshotX, snapshotY);
 
-            if (e.getDistance(player) > e.getRange())
-                continue; // don't shoot if player is too far away
+            if (e.getDistance(player) > e.getRange()) continue; // don't shoot if player is too far away
             var projectiles = e.shootProjectiles(e.angleTowards(player));
             if (projectiles != null) {
                 enemyProjectiles.addAll(projectiles);
@@ -132,13 +139,19 @@ public class GameContext {
 
         // Move camera
         final var bbox = player.getBbox();
+        final var centerX = player.getX() + bbox.w() / 2.0;
+        final var centerY = player.getY() + bbox.h() / 2.0;
 
         camera.setViewSize(renderer.getWidth(), renderer.getHeight());
-        camera.setPosition(bbox.x(), bbox.y());
+
+        if (!bossFightActive) {
+            camera.setPosition(centerX, centerY);
+        }
 
         final var mouseWorld = camera.screenToWorld(input.getMouseX(), input.getMouseY());
-        final var dx = mouseWorld.x - bbox.x();
-        final var dy = mouseWorld.y - bbox.y();
+        final var dx = mouseWorld.x - centerX;
+        final var dy = mouseWorld.y - centerY;
+
         player.rotation = Math.toDegrees(Math.atan2(dy, dx));
 
         // move all player projectiles, destroy if lifetime elapsed
@@ -166,6 +179,19 @@ public class GameContext {
                     break;
                 }
             }
+            if (bossFightActive) {
+                if (theBoss.getBbox().intersects(p.getBbox())) {
+                    // projectile hits enemy
+                    hit = true;
+                    if (theBoss.takeDamage()) {
+                        // enemy defeated
+                        points += 5000000;
+                        theBoss = null;
+                    }
+                    points += 200;
+                }
+            }
+
             if (expired || hit)
                 it.remove();
         }
@@ -181,19 +207,47 @@ public class GameContext {
             if (player.getBbox().intersects(p.getBbox())) {
                 hit = true;
                 if (player.takeDamage()) {
-                    // TODO: defeated -> game over ?
+                    // start boss fight
+                    spawningEnabled = false;
+                    triggerPlayerDefeat = true;
                     System.out.println("Player defeated!");
                 }
             }
-            if (expired || hit)
-                it.remove();
+            if (expired || hit) it.remove();
         }
 
         // left click down -> create new player projectile
         if (input.isMouseDown(MouseEvent.BUTTON1)) {
             var ps = player.shootProjectiles(player.rotation);
-            if (ps != null)
-                playerProjectiles.addAll(ps);
+            if (ps != null) playerProjectiles.addAll(ps);
+        }
+
+        // set up boss fight
+        if (triggerPlayerDefeat) {
+            triggerPlayerDefeat = false;
+            enemyProjectiles.clear();
+            playerProjectiles.clear();
+            enemies.clear();
+            camera.setPosition(1250, 1050);
+            theBoss = new Boss();
+            bossFightActive = true;
+        }
+
+        if (bossFightActive) {
+            Rectangle2D.Double bounds = camera.getVisibleBounds();
+            double cx = player.getX();
+            double cy = player.getY();
+            if (cx < bounds.x || cx > bounds.x + bounds.width || cy - 250 < bounds.y || cy > bounds.y + bounds.height) {
+                double pdx = theBoss.getX() - player.getX();
+                double pdy = theBoss.getY() + 500 - player.getY();
+
+                double magnitude = Math.sqrt(pdx * pdx + pdy * pdy);
+
+                pdx /= magnitude;
+                pdy /= magnitude;
+
+                player.move(pdx, pdy, dt * 2);
+            }
         }
     }
 
@@ -218,6 +272,8 @@ public class GameContext {
             for (final var p : enemyProjectiles) {
                 r.drawImage(p);
             }
+            if (theBoss != null)
+                r.drawImage(theBoss);
 
             // ui drawing
             r.useScreenSpace();

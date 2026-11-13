@@ -25,8 +25,8 @@ public class Projectile extends Entity {
     public Projectile(String path, double x, double y, double direction, double speed, double lifetime, int width,
                       int height) {
         this(path);
-        this.position.x = x;
-        this.position.y = y;
+        this.xPos = x;
+        this.yPos = y;
         this.direction = direction;
         this.speed = speed;
         this.lifetime = lifetime;
@@ -36,8 +36,8 @@ public class Projectile extends Entity {
 
     public Projectile(double x, double y, double direction) {
         this();
-        this.position.x = x;
-        this.position.y = y;
+        this.xPos = x;
+        this.yPos = y;
         this.direction = direction;
     }
 
@@ -56,11 +56,11 @@ public class Projectile extends Entity {
 
     @Override
     public BBox getBbox() {
-        return new BBox(position.x, position.y, this.width, this.height);
+        return new BBox(xPos, yPos, this.width, this.height);
     }
 
     @Override
     public void render(Graphics2D ctx) {
-        ctx.drawImage(this.img, (int) (position.x - this.width / 2.0), (int) (position.y - this.height / 2.0), (int) this.width, (int) this.height, null);
+        ctx.drawImage(this.img, (int) (xPos - this.width / 2.0), (int) (yPos - this.height / 2.0), (int) this.width, (int) this.height, null);
     }
 }

@@ -96,6 +96,18 @@ public class SpawnManager {
         this.maxY = maxY;
     }
 
+    public Enemy spawnEnemy() {
+        String randomKey = keys.get(random.nextInt(keys.size()));
+        var e = new Enemy(enemyTypes.get(randomKey));
+
+        double x = random.nextDouble(minX, maxX);
+        double y = random.nextDouble(minY, maxY);
+
+        e.teleport((int) x, (int) y);
+
+        return e;
+    }
+
     public HashSet<Enemy> spawnEnemies(double dt) {
         timeSinceLastSpawn += dt;
         if (timeSinceLastSpawn < random.nextDouble(1.0, 2.5))

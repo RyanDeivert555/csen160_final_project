@@ -8,7 +8,7 @@ import java.util.HashSet;
 public class Player extends Entity {
     private static String path = "/player.png";
 
-    private final double fireRate = 12.0; // per second
+    private final double fireRate = 18.0; // per second
     private double fireTimer = 0;
     private boolean canFire = false;
     private int projectileCount = 1;
@@ -27,10 +27,10 @@ public class Player extends Entity {
         super(path);
 
         this.maxHealth = 10;
-        this.health = 5;
+        this.health = 10;
 
-        this.position.x = 64;
-        this.position.y = 64;
+        xPos = 64;
+        yPos = 64;
     }
 
     public void attachMap(Map map) {
@@ -38,8 +38,8 @@ public class Player extends Entity {
     }
 
     public void moveAndCollide(Map map, double dx, double dy) {
-        position.x = map.moveX(position.x, position.y, playerWidth, playerHeight, dx);
-        position.y = map.moveY(position.x, position.y, playerWidth, playerHeight, dy);
+        xPos = map.moveX(xPos, yPos, playerWidth, playerHeight, dx);
+        yPos = map.moveY(xPos, yPos, playerWidth, playerHeight, dy);
     }
 
     @Override
@@ -54,8 +54,8 @@ public class Player extends Entity {
             return;
 
         final double scale = speed * dt / magnitude;
-        position.x = map.moveX(position.x, position.y, playerWidth, playerHeight, dx * scale);
-        position.y = map.moveY(position.x, position.y, playerWidth, playerHeight, dy * scale);
+        xPos = map.moveX(xPos, yPos, playerWidth, playerHeight, dx * scale);
+        yPos = map.moveY(xPos, yPos, playerWidth, playerHeight, dy * scale);
     }
 
     public void update(double dt) {
@@ -74,7 +74,7 @@ public class Player extends Entity {
         this.canFire = false;
         this.fireTimer = 0;
 
-        return new Projectile("/projectile.png", position.x, position.y, deg, 500, 1, 10, 10);
+        return new Projectile("/projectile.png", xPos, yPos, deg, 500, 1, 10, 10);
     }
 
     public HashSet<Projectile> shootProjectiles(double deg) {
@@ -108,11 +108,11 @@ public class Player extends Entity {
         double forwardY = Math.sin(rad);
 
         for (double[] offset : offsets) {
-            double x = position.x
+            double x = xPos
                     + perpendicularX * offset[0]
                     + forwardX * offset[1];
 
-            double y = position.y
+            double y = yPos
                     + perpendicularY * offset[0]
                     + forwardY * offset[1];
 
@@ -142,7 +142,7 @@ public class Player extends Entity {
 
     @Override
     public BBox getBbox() {
-        return new BBox(position.x, position.y, this.playerWidth, this.playerHeight);
+        return new BBox(xPos, yPos, this.playerWidth, this.playerHeight);
     }
 
     @Override
@@ -150,18 +150,18 @@ public class Player extends Entity {
         // player is rendered twice as large as the hitbox
         final var tempCtx = (Graphics2D) ctx.create();
 
-        tempCtx.rotate(Math.toRadians(rotation), this.position.x, this.position.y);
+        tempCtx.rotate(Math.toRadians(rotation), this.xPos, this.yPos);
 
         int drawWidth = (int) (playerWidth * imageScale);
         int drawHeight = (int) (playerHeight * imageScale);
-        tempCtx.drawImage(img, (int) (position.x - drawWidth / 2.0), (int) (position.y - drawHeight / 2.0), drawWidth,
+        tempCtx.drawImage(img, (int) (xPos - drawWidth / 2.0), (int) (yPos - drawHeight / 2.0), drawWidth,
                 drawHeight, null);
 
         tempCtx.dispose();
 
         // draw hitbox
         ctx.setColor(Color.green);
-        ctx.drawOval((int) position.x - playerWidth / 2, (int) position.y - playerHeight / 2, playerWidth,
+        ctx.drawOval((int) xPos - playerWidth / 2, (int) yPos - playerHeight / 2, playerWidth,
                 playerHeight);
         // Ellipse2D.Double circle = new Ellipse2D.Double(position.x - playerWidth /
         // 2.0, position.y - playerHeight / 2.0, playerWidth, playerHeight);
